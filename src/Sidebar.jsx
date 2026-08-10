@@ -26,11 +26,13 @@ export default function Sidebar() {
             </NavLink>
           </li>
         ))}
+        <li style={{ marginTop: "auto" }}>
+          <NavLink to="/parametres" className={linkClass}>
+            <span className="sidebar__icon">⚙️</span>
+            Paramètres
+          </NavLink>
+        </li>
       </ul>
-      <NavLink to="/parametres" className={linkClass} style={{ marginTop: "auto" }}>
-        <span className="sidebar__icon">⚙️</span>
-        Paramètres
-      </NavLink>
     </nav>
   );
 }

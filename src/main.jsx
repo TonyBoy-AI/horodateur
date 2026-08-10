@@ -11,6 +11,7 @@ import Parametres from "./pages/Parametres";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<AppLayout />}>
@@ -24,4 +25,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       </Route>
     </Routes>
   </BrowserRouter>
+  </React.StrictMode>
 );
