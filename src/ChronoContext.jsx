@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import {
   getEntreeOuverte,
   demarrerEntree,
@@ -12,6 +12,7 @@ const ChronoContext = createContext(null);
 export function ChronoProvider({ children }) {
   // entree: { id, debut, clientId, projetId, note } | null
   const [entree, setEntree] = useState(null);
+  const isStoppingRef = useRef(false);
 
   // Restauration au démarrage de l'app
   useEffect(() => {
@@ -45,9 +46,9 @@ export function ChronoProvider({ children }) {
   }
 
   async function arreter() {
-    let current = null;
-    setEntree((prev) => { current = prev; return prev; });
-    if (!current) return;
+    if (isStoppingRef.current || !entree) return;
+    isStoppingRef.current = true;
+    const current = entree;
     try {
       const fin = new Date().toISOString();
       const duree = Math.round((new Date(fin) - new Date(current.debut)) / 60000);
@@ -62,6 +63,8 @@ export function ChronoProvider({ children }) {
       setEntree(null);
     } catch (e) {
       console.error(e);
+    } finally {
+      isStoppingRef.current = false;
     }
   }
 
