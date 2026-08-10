@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useChrono } from "./ChronoContext";
 import "./Sidebar.css";
 
 const LINKS = [
@@ -14,6 +15,8 @@ function linkClass({ isActive }) {
 }
 
 export default function Sidebar() {
+  const { entree } = useChrono();
+
   return (
     <nav className="sidebar">
       <div className="sidebar__logo">🌿 Horodateur</div>
@@ -23,6 +26,9 @@ export default function Sidebar() {
             <NavLink to={to} className={linkClass}>
               <span className="sidebar__icon">{icon}</span>
               {label}
+              {to === "/chrono" && entree && (
+                <span className="sidebar__pulse" aria-label="Chrono en cours" />
+              )}
             </NavLink>
           </li>
         ))}

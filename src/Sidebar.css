@@ -51,3 +51,18 @@
   font-size: 16px;
   line-height: 1;
 }
+
+.sidebar__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7FD8A0;
+  margin-left: auto;
+  flex-shrink: 0;
+  animation: sidebar-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes sidebar-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
