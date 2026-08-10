@@ -34,7 +34,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         couleur: client.couleur ?? "#7FD8A0",
         actif: Boolean(client.actif),
       });
-      getProjetsByClient(client.id).then(setProjets).catch(console.error);
+      loadProjets();
     } else {
       setForm(EMPTY_FORM);
       setProjets([]);

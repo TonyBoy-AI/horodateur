@@ -13,29 +13,41 @@ export default function ProjetsList({ clientId, projets, onRefresh }) {
   }
 
   async function saveEdit(id) {
-    await updateProjet(id, {
-      nom: editValues.nom.trim(),
-      taux_horaire: editValues.taux_horaire !== "" ? Number(editValues.taux_horaire) : null,
-    });
-    setEditingId(null);
-    onRefresh();
+    if (!editValues.nom.trim()) return;
+    try {
+      await updateProjet(id, {
+        nom: editValues.nom.trim(),
+        taux_horaire: editValues.taux_horaire !== "" ? Number(editValues.taux_horaire) : null,
+      });
+      setEditingId(null);
+      onRefresh();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async function handleDelete(id) {
-    if (!window.confirm("Supprimer ce projet ?")) return;
-    await deleteProjet(id);
-    onRefresh();
+    try {
+      await deleteProjet(id);
+      onRefresh();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async function handleAdd() {
-    if (!newProjet?.nom?.trim()) return;
-    await createProjet({
-      client_id: clientId,
-      nom: newProjet.nom.trim(),
-      taux_horaire: newProjet.taux_horaire !== "" ? Number(newProjet.taux_horaire) : null,
-    });
-    setNewProjet(null);
-    onRefresh();
+    if (!newProjet.nom.trim()) return;
+    try {
+      await createProjet({
+        client_id: clientId,
+        nom: newProjet.nom.trim(),
+        taux_horaire: newProjet.taux_horaire !== "" ? Number(newProjet.taux_horaire) : null,
+      });
+      setNewProjet({ nom: "", taux_horaire: "" });
+      onRefresh();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return (

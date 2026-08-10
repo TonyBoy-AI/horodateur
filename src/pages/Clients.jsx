@@ -46,9 +46,9 @@ export default function Clients() {
   }
 
   async function handleDeleted() {
-    await loadClients();
     setSelectedId(null);
     setShowNew(false);
+    await loadClients();
   }
 
   function handleNewClick() {
