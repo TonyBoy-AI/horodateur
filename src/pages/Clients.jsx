@@ -8,17 +8,20 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [showNew, setShowNew] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     loadClients();
   }, []);
 
   async function loadClients() {
+    setLoadError(null);
     try {
       const list = await getClients();
       setClients(list);
     } catch (e) {
       console.error(e);
+      setLoadError("Impossible de charger les clients.");
     }
   }
 
@@ -48,13 +51,18 @@ export default function Clients() {
     setShowNew(false);
   }
 
+  function handleNewClick() {
+    setSelectedId(null);
+    setShowNew(true);
+  }
+
   return (
     <div className="clients-page">
       <div className="clients-page__toolbar">
         <h1 className="clients-page__title">👥 Clients</h1>
         <button
           className="clients-page__new-btn"
-          onClick={() => { setSelectedId(null); setShowNew(true); }}
+          onClick={handleNewClick}
         >
           + Nouveau client
         </button>
@@ -62,7 +70,8 @@ export default function Clients() {
 
       <div className="clients-page__body">
         <div className="clients-page__grid">
-          {clients.length === 0 && (
+          {loadError && <p className="clients-page__error">{loadError}</p>}
+          {!loadError && clients.length === 0 && (
             <p className="clients-page__empty">
               Aucun client pour l'instant — crée-en un ! 🌱
             </p>

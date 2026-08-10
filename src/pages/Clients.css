@@ -35,6 +35,11 @@
   opacity: 0.85;
 }
 
+.clients-page__new-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .clients-page__body {
   display: flex;
   gap: 16px;
@@ -57,4 +62,12 @@
   font-size: 14px;
   margin-top: 32px;
   text-align: center;
+}
+
+.clients-page__error {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
 }

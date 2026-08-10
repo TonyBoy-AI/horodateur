@@ -14,6 +14,7 @@ export default function ClientCard({ client, isSelected, onClick }) {
       className={classes}
       onClick={onClick}
       role="button"
+      aria-pressed={isSelected}
       tabIndex={0}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
     >
