@@ -85,7 +85,7 @@ export async function arreterEntree(id, { fin, duree_minutes, duree_arrondie_min
   const d = await getDb();
   await d.execute(
     "UPDATE entrees_temps SET fin=?, duree_minutes=?, duree_arrondie_minutes=?, note=? WHERE id=?",
-    [fin, duree_minutes, duree_arrondie_minutes, note || null, id]
+    [fin, duree_minutes ?? null, duree_arrondie_minutes ?? null, note || null, id]
   );
 }
 
