@@ -1,0 +1,39 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #E8F8EE;
+  --color-sidebar: #1b4332;
+  --color-sidebar-active: #2d6a4f;
+  --color-accent: #7FD8A0;
+  --color-surface: #d8f3dc;
+  --color-text: #1b4332;
+  --color-text-muted: #6b9e7e;
+  --font-title: 'Fredoka', sans-serif;
+  --font-body: 'Quicksand', sans-serif;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
