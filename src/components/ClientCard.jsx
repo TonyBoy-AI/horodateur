@@ -10,7 +10,13 @@ export default function ClientCard({ client, isSelected, onClick }) {
     .join(" ");
 
   return (
-    <div className={classes} onClick={onClick}>
+    <div
+      className={classes}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
+    >
       <div
         className="client-card__avatar"
         style={{ background: client.couleur + "33", color: client.couleur }}

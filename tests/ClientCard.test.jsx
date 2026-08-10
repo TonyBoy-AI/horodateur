@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import ClientCard from "../src/components/ClientCard";
 
@@ -39,10 +40,10 @@ describe("ClientCard", () => {
     expect(container.firstChild).toHaveClass("client-card--selected");
   });
 
-  it("appelle onClick au clic", () => {
+  it("appelle onClick au clic", async () => {
     const onClick = vi.fn();
     render(<ClientCard client={baseClient} isSelected={false} onClick={onClick} />);
-    screen.getByText("Studio Lumière").closest(".client-card").click();
+    await userEvent.click(screen.getByRole("button", { name: /Studio Lumière/ }));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 });
