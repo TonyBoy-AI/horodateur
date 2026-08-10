@@ -33,7 +33,7 @@ export async function updateClient(id, { nom, taux_horaire, courriel, adresse, c
   const d = await getDb();
   await d.execute(
     "UPDATE clients SET nom=?, taux_horaire=?, courriel=?, adresse=?, couleur=?, actif=? WHERE id=?",
-    [nom, taux_horaire, courriel || null, adresse || null, couleur, actif ? 1 : 0, id]
+    [nom, taux_horaire, courriel || null, adresse || null, couleur || "#7FD8A0", actif ? 1 : 0, id]
   );
 }
 
