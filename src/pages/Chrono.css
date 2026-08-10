@@ -1,0 +1,114 @@
+.chrono-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.chrono-page__title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--color-text);
+  font-weight: 700;
+  align-self: flex-start;
+}
+
+.chrono-page__selects {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.chrono-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.chrono-page__field--note {
+  width: 100%;
+}
+
+.chrono-page__field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chrono-page__field select,
+.chrono-page__field textarea {
+  border: 1.5px solid #c8efd8;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: white;
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+
+.chrono-page__field select:focus,
+.chrono-page__field textarea:focus {
+  border-color: var(--color-accent);
+}
+
+.chrono-page__field select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.chrono-page__field textarea {
+  resize: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chrono-page__timer {
+  font-family: var(--font-title);
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+.chrono-page__btn {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 48px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.chrono-page__btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.chrono-page__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.chrono-page__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chrono-page__btn--start {
+  background: var(--color-accent);
+  color: var(--color-sidebar);
+}
+
+.chrono-page__btn--stop {
+  background: #e76f51;
+  color: white;
+}
