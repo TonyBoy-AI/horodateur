@@ -63,3 +63,45 @@ export async function deleteProjet(id) {
   const d = await getDb();
   await d.execute("DELETE FROM projets WHERE id = ?", [id]);
 }
+
+export async function getEntreeOuverte() {
+  const d = await getDb();
+  const rows = await d.select(
+    "SELECT * FROM entrees_temps WHERE fin IS NULL LIMIT 1"
+  );
+  return rows[0] ?? null;
+}
+
+export async function demarrerEntree({ client_id, projet_id, debut }) {
+  const d = await getDb();
+  const result = await d.execute(
+    "INSERT INTO entrees_temps (client_id, projet_id, debut) VALUES (?, ?, ?)",
+    [client_id, projet_id ?? null, debut]
+  );
+  return result.lastInsertId;
+}
+
+export async function arreterEntree(id, { fin, duree_minutes, duree_arrondie_minutes, note }) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE entrees_temps SET fin=?, duree_minutes=?, duree_arrondie_minutes=?, note=? WHERE id=?",
+    [fin, duree_minutes, duree_arrondie_minutes, note || null, id]
+  );
+}
+
+export async function updateEntreeNote(id, note) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE entrees_temps SET note=? WHERE id=?",
+    [note || null, id]
+  );
+}
+
+export async function getParametre(cle) {
+  const d = await getDb();
+  const rows = await d.select(
+    "SELECT valeur FROM parametres WHERE cle = ?",
+    [cle]
+  );
+  return rows[0]?.valeur ?? null;
+}
