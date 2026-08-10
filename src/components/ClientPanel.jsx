@@ -22,6 +22,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
   const isNew = !client;
   const [form, setForm] = useState(EMPTY_FORM);
   const [projets, setProjets] = useState([]);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     if (client) {
@@ -38,6 +39,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
       setForm(EMPTY_FORM);
       setProjets([]);
     }
+    setSaveError("");
   }, [client?.id]);
 
   async function loadProjets() {
@@ -51,7 +53,11 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
   }
 
   async function handleSave() {
-    if (!form.nom.trim() || form.taux_horaire === "") return;
+    if (!form.nom.trim() || form.taux_horaire === "") {
+      setSaveError("Le nom et le taux horaire sont requis.");
+      return;
+    }
+    setSaveError("");
     const data = { ...form, taux_horaire: Number(form.taux_horaire) };
     if (isNew) {
       const id = await createClient(data);
@@ -86,8 +92,9 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
 
       <div className="client-panel__body">
         <div className="client-panel__field">
-          <label>Nom *</label>
+          <label htmlFor="cp-nom">Nom *</label>
           <input
+            id="cp-nom"
             value={form.nom}
             onChange={(e) => set("nom", e.target.value)}
             placeholder="Nom du client"
@@ -95,8 +102,9 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         </div>
 
         <div className="client-panel__field">
-          <label>Taux horaire ($/h) *</label>
+          <label htmlFor="cp-taux">Taux horaire ($/h) *</label>
           <input
+            id="cp-taux"
             type="number"
             min="0"
             step="0.5"
@@ -107,8 +115,9 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         </div>
 
         <div className="client-panel__field">
-          <label>Courriel</label>
+          <label htmlFor="cp-courriel">Courriel</label>
           <input
+            id="cp-courriel"
             type="email"
             value={form.courriel}
             onChange={(e) => set("courriel", e.target.value)}
@@ -117,8 +126,9 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         </div>
 
         <div className="client-panel__field">
-          <label>Adresse</label>
+          <label htmlFor="cp-adresse">Adresse</label>
           <textarea
+            id="cp-adresse"
             rows={2}
             value={form.adresse}
             onChange={(e) => set("adresse", e.target.value)}
@@ -136,7 +146,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
                 className={`client-panel__swatch${form.couleur === c ? " client-panel__swatch--active" : ""}`}
                 style={{ background: c }}
                 onClick={() => set("couleur", c)}
-                aria-label={c}
+                aria-label={`Couleur ${c}`}
               />
             ))}
           </div>
@@ -159,6 +169,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
       </div>
 
       <div className="client-panel__footer">
+        {saveError && <p className="client-panel__error">{saveError}</p>}
         <button className="client-panel__save" onClick={handleSave}>
           💾 Sauvegarder
         </button>

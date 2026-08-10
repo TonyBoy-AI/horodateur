@@ -169,9 +169,16 @@
   cursor: pointer;
   text-align: center;
   padding: 4px;
-  transition: text-decoration 0.1s;
 }
 
 .client-panel__delete:hover {
   text-decoration: underline;
+}
+
+.client-panel__error {
+  font-size: 11px;
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 6px;
+  padding: 5px 8px;
 }
