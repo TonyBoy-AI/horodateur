@@ -34,7 +34,7 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         couleur: client.couleur ?? "#7FD8A0",
         actif: Boolean(client.actif),
       });
-      loadProjets();
+      getProjetsByClient(client.id).then(setProjets).catch(console.error);
     } else {
       setForm(EMPTY_FORM);
       setProjets([]);
@@ -44,8 +44,12 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
 
   async function loadProjets() {
     if (!client) return;
-    const list = await getProjetsByClient(client.id);
-    setProjets(list);
+    try {
+      const list = await getProjetsByClient(client.id);
+      setProjets(list);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   function set(field, value) {
@@ -58,13 +62,17 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
       return;
     }
     setSaveError("");
-    const data = { ...form, taux_horaire: Number(form.taux_horaire) };
-    if (isNew) {
-      const id = await createClient(data);
-      onSaved(id);
-    } else {
-      await updateClient(client.id, data);
-      onSaved(client.id);
+    try {
+      const data = { ...form, taux_horaire: Number(form.taux_horaire) };
+      if (isNew) {
+        const id = await createClient(data);
+        onSaved(id);
+      } else {
+        await updateClient(client.id, data);
+        onSaved(client.id);
+      }
+    } catch (e) {
+      setSaveError("Erreur lors de la sauvegarde.");
     }
   }
 
@@ -75,8 +83,12 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
       )
     )
       return;
-    await deleteClient(client.id);
-    onDeleted();
+    try {
+      await deleteClient(client.id);
+      onDeleted();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return (
@@ -156,6 +168,8 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
           <label>Actif</label>
           <button
             type="button"
+            role="switch"
+            aria-checked={form.actif}
             className={`client-panel__toggle${form.actif ? " client-panel__toggle--on" : ""}`}
             onClick={() => set("actif", !form.actif)}
           >
