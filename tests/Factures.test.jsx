@@ -9,6 +9,13 @@ vi.mock("../src/db/database", () => ({
   createFacture: vi.fn(),
   linkEntreesToFacture: vi.fn(),
   updateFactureStatut: vi.fn(),
+  getEntreesParFacture: vi.fn(),
+}));
+
+vi.mock("../src/utils/generatePdf", () => ({
+  generatePdf: vi.fn().mockResolvedValue({ pdfBytes: new Uint8Array(), truncated: false, totalWeeks: 1 }),
+  downloadPdf: vi.fn(),
+  groupByWeek: vi.fn().mockReturnValue([]),
 }));
 
 import Factures from "../src/pages/Factures";
@@ -19,7 +26,9 @@ import {
   createFacture,
   linkEntreesToFacture,
   updateFactureStatut,
+  getEntreesParFacture,
 } from "../src/db/database";
+import { generatePdf, downloadPdf } from "../src/utils/generatePdf";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -29,6 +38,7 @@ beforeEach(() => {
   createFacture.mockResolvedValue(1);
   linkEntreesToFacture.mockResolvedValue(undefined);
   updateFactureStatut.mockResolvedValue(undefined);
+  getEntreesParFacture.mockResolvedValue([]);
 });
 
 describe("Factures", () => {
@@ -77,5 +87,28 @@ describe("Factures", () => {
     await userEvent.selectOptions(screen.getByLabelText(/client/i), "1");
     await waitFor(() => expect(getEntreesSansFacture).toHaveBeenCalledWith(1));
     await waitFor(() => expect(screen.getByText("1h30")).toBeInTheDocument());
+  });
+
+  it("affiche le bouton PDF sur chaque facture dans la liste", async () => {
+    getFactures.mockResolvedValue([{
+      id: 1, client_id: 1, numero: "F-2026-001", client_nom: "Studio Lumière",
+      date_emission: "2026-08-11", montant_total: 120, statut: "impayee",
+    }]);
+    render(<Factures />);
+    await waitFor(() => expect(screen.getByText("📄 PDF")).toBeInTheDocument());
+  });
+
+  it("appelle generatePdf et downloadPdf à la création d'une facture", async () => {
+    getEntreesSansFacture.mockResolvedValue([{
+      id: 1, debut: "2026-08-10T09:00:00", fin: "2026-08-10T11:00:00",
+      duree_minutes: 120, duree_arrondie_minutes: 120, note: null, projet_nom: null,
+    }]);
+    render(<Factures />);
+    await userEvent.click(screen.getByText("+ Nouvelle facture"));
+    await userEvent.selectOptions(screen.getByLabelText(/client/i), "1");
+    await waitFor(() => expect(getEntreesSansFacture).toHaveBeenCalledWith(1));
+    await userEvent.click(screen.getByText("Créer la facture"));
+    await waitFor(() => expect(generatePdf).toHaveBeenCalled());
+    expect(downloadPdf).toHaveBeenCalled();
   });
 });

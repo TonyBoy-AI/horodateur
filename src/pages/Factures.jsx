@@ -6,7 +6,9 @@ import {
   createFacture,
   linkEntreesToFacture,
   updateFactureStatut,
+  getEntreesParFacture,
 } from "../db/database";
+import { generatePdf, downloadPdf, groupByWeek } from "../utils/generatePdf";
 import "./Factures.css";
 
 function formatDate(isoStr) {
@@ -35,6 +37,7 @@ export default function Factures() {
   const [numero, setNumero] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [pdfWarning, setPdfWarning] = useState(null);
 
   useEffect(() => {
     loadFactures();
@@ -78,6 +81,7 @@ export default function Factures() {
     (sum, e) => sum + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
   );
   const montantTotal = (totalMinutes / 60) * taux;
+  const willTruncate = groupByWeek(selectedEntrees).length > 8;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -88,13 +92,32 @@ export default function Factures() {
       const date_emission = new Date().toISOString().slice(0, 10);
       const id = await createFacture({ client_id: Number(clientId), numero, date_emission, montant_total: montantTotal });
       await linkEntreesToFacture(id, [...selectedIds]);
+      const { pdfBytes, truncated, totalWeeks } = await generatePdf(
+        { id, numero, date_emission },
+        clientObj,
+        selectedEntrees
+      );
+      downloadPdf(pdfBytes, `${numero}.pdf`);
       setPanelOpen(false);
+      if (truncated) setPdfWarning(`Attention : seulement 8 semaines sur ${totalWeeks} ont été incluses dans le PDF.`);
       loadFactures();
     } catch (err) {
       console.error(err);
       setError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDownloadPdf(facture) {
+    try {
+      const client = clients.find((c) => c.id === facture.client_id);
+      if (!client) throw new Error("Client introuvable");
+      const entries = await getEntreesParFacture(facture.id);
+      const { pdfBytes } = await generatePdf(facture, client, entries);
+      downloadPdf(pdfBytes, `${facture.numero}.pdf`);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -115,6 +138,10 @@ export default function Factures() {
         <button className="factures-page__btn-new" onClick={openPanel}>+ Nouvelle facture</button>
       </div>
 
+      {pdfWarning && (
+        <p className="factures-page__pdf-warning">{pdfWarning}</p>
+      )}
+
       {factures.length === 0 ? (
         <p className="factures-page__empty">Aucune facture pour le moment.</p>
       ) : (
@@ -133,6 +160,9 @@ export default function Factures() {
                 </span>
                 <button className="factures-page__btn-statut" onClick={() => toggleStatut(f)}>
                   {f.statut === "payee" ? "Marquer impayée" : "Marquer payée"}
+                </button>
+                <button className="factures-page__btn-pdf" onClick={() => handleDownloadPdf(f)}>
+                  📄 PDF
                 </button>
               </div>
             </li>
@@ -186,6 +216,12 @@ export default function Factures() {
 
               {clientId && entrees.length === 0 && (
                 <p className="factures-panel__no-entries">Aucune entrée non facturée pour ce client.</p>
+              )}
+
+              {willTruncate && (
+                <p className="factures-panel__warning">
+                  {`${groupByWeek(selectedEntrees).length} semaines détectées — seulement les 8 premières seront dans le PDF.`}
+                </p>
               )}
 
               <div className="factures-panel__field">
