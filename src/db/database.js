@@ -158,3 +158,48 @@ export async function getEntreesParPeriode({ debut, fin, client_id = null }) {
     params
   );
 }
+
+export async function getFactures() {
+  const d = await getDb();
+  return d.select(
+    `SELECT f.id, f.numero, f.date_emission, f.montant_total, f.statut,
+            c.nom AS client_nom
+     FROM factures f
+     LEFT JOIN clients c ON c.id = f.client_id
+     ORDER BY f.date_emission DESC`
+  );
+}
+
+export async function getEntreesSansFacture(client_id) {
+  const d = await getDb();
+  return d.select(
+    `SELECT e.id, e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
+            p.nom AS projet_nom
+     FROM entrees_temps e
+     LEFT JOIN projets p ON p.id = e.projet_id
+     WHERE e.client_id = ? AND e.fin IS NOT NULL AND e.facture_id IS NULL
+     ORDER BY e.debut ASC`,
+    [client_id]
+  );
+}
+
+export async function createFacture({ client_id, numero, date_emission, montant_total }) {
+  const d = await getDb();
+  const result = await d.execute(
+    "INSERT INTO factures (client_id, numero, date_emission, montant_total) VALUES (?, ?, ?, ?)",
+    [client_id, numero, date_emission, montant_total]
+  );
+  return result.lastInsertId;
+}
+
+export async function linkEntreesToFacture(facture_id, entree_ids) {
+  const d = await getDb();
+  for (const id of entree_ids) {
+    await d.execute("UPDATE entrees_temps SET facture_id=? WHERE id=?", [facture_id, id]);
+  }
+}
+
+export async function updateFactureStatut(id, statut) {
+  const d = await getDb();
+  await d.execute("UPDATE factures SET statut=? WHERE id=?", [statut, id]);
+}
