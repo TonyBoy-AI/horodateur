@@ -33,26 +33,6 @@ export function formatWeekLabel(monday) {
   return `semaine du ${fmt(monday)} au ${fmt(sunday)}`;
 }
 
-// Coordonnées en points (72pt = 1 pouce), origine bas-gauche.
-const COORDS = {
-  numero:        { x: 390, y: 703 },
-  date:          { x: 498, y: 703 },
-  nomEntreprise: { x: 42,  y: 653 },
-  courriel:      { x: 42,  y: 636 },
-  telephone:     { x: 42,  y: 619 },
-  adresse:       { x: 42,  y: 602 },
-  persRef:       { x: 374, y: 653 },
-  tableFirstY:   527,
-  tableRowH:     17.5,
-  colDesc:       42,
-  colNote:       185,
-  colQty:        358,
-  colPrix:       420,
-  colMontant:    500,
-  soustotal:     { x: 500, y: 329 },
-  total:         { x: 500, y: 309 },
-};
-
 function formatDateFR(isoStr) {
   if (!isoStr) return "";
   const [y, m, d] = isoStr.split("-");
@@ -65,52 +45,184 @@ export async function generatePdf(facture, client, entrees) {
   const totalWeeks = allWeeks.length;
   const weeks = allWeeks.slice(0, 8);
 
-  const resp = await fetch("/template-facture.pdf");
-  if (!resp.ok) throw new Error("Template PDF introuvable");
-  const arrayBuffer = await resp.arrayBuffer();
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([612, 792]);
 
-  const pdfDoc = await PDFDocument.load(arrayBuffer);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const page = pdfDoc.getPages()[0];
-  const fontSize = 9;
-  const black = rgb(0, 0, 0);
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  const draw = (text, x, y) => {
-    if (!text) return;
-    page.drawText(String(text), { x, y, size: fontSize, font, color: black });
+  const BLUE = rgb(0.267, 0.447, 0.769);
+  const LGRAY = rgb(0.93, 0.93, 0.93);
+  const LBLUE = rgb(0.93, 0.95, 0.99);
+  const WHITE = rgb(1, 1, 1);
+  const BLACK = rgb(0, 0, 0);
+  const DARK = rgb(0.15, 0.15, 0.15);
+
+  const ML = 35;
+  const CW = 542;
+
+  // Helper: draw text
+  const t = (str, x, y, size = 9, font = regular, color = BLACK) => {
+    if (str == null || str === "") return;
+    page.drawText(String(str), { x, y, size, font, color });
   };
 
-  draw(facture.numero, COORDS.numero.x, COORDS.numero.y);
-  draw(formatDateFR(facture.date_emission), COORDS.date.x, COORDS.date.y);
-  draw(client.nom, COORDS.nomEntreprise.x, COORDS.nomEntreprise.y);
-  draw(client.courriel, COORDS.courriel.x, COORDS.courriel.y);
-  draw(client.telephone, COORDS.telephone.x, COORDS.telephone.y);
-  draw(client.adresse, COORDS.adresse.x, COORDS.adresse.y);
-  draw(client.personne_reference, COORDS.persRef.x, COORDS.persRef.y);
+  // Helper: filled rect (with optional border)
+  const box = (x, y, w, h, fill, borderColor = null) => {
+    page.drawRectangle({
+      x, y, width: w, height: h,
+      color: fill,
+      borderColor: borderColor ?? fill,
+      borderWidth: borderColor ? 0.5 : 0,
+    });
+  };
 
+  // ── HEADER ──────────────────────────────────────────────────
+  t("NOÉMY BIZIER- COMPTABLE", ML, 755, 14, bold, BLUE);
+  t("FACTURE", 430, 748, 34, bold, BLUE);
+
+  t("425 RUE DES CHÊNES EST, app. 2", ML, 733, 9, regular, DARK);
+  t("G1J 1K5, QC, QUÉBEC", ML, 720, 9, regular, DARK);
+  t("581-999-2355", ML, 707, 9, bold, DARK);
+  t("noemybizier8@gmail.com", ML, 694, 9, regular, DARK);
+
+  // N° FACTURE | DATE boxes (right side)
+  const bx = 380; // box area starts here
+  const bw = CW - (bx - ML); // width = 577 - 380 = 197
+  const hw = bw / 2; // half width
+
+  // Headers
+  box(bx, 734, hw, 24, BLUE); // N° FACTURE header
+  box(bx + hw, 734, hw, 24, BLUE); // DATE header
+  t("N° FACTURE", bx + 5, 743, 8, bold, WHITE);
+  t("DATE", bx + hw + 5, 743, 8, bold, WHITE);
+
+  // Values
+  box(bx, 710, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
+  box(bx + hw, 710, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
+  t(facture.numero, bx + 5, 719, 9, bold, BLACK);
+  t(formatDateFR(facture.date_emission), bx + hw + 5, 719, 9, regular, BLACK);
+
+  // ── FACTURER À / RÉF CLIENT / CONDITIONS ────────────────────
+  const ibTop = 693; // info boxes top y (bottom of N° FACTURE value box area)
+  const ibHdr = 20; // header height
+  const ibBody = 75; // content height
+  const cliW = 210;
+  const refW = 155;
+  const condW = CW - cliW - refW; // = 177
+
+  // Box headers
+  box(ML, ibTop - ibHdr, cliW, ibHdr, BLUE);
+  box(ML + cliW, ibTop - ibHdr, refW, ibHdr, BLUE);
+  box(ML + cliW + refW, ibTop - ibHdr, condW, ibHdr, BLUE);
+  t("FACTURER À", ML + 5, ibTop - 14, 9, bold, WHITE);
+  t("RÉF CLIENT", ML + cliW + 5, ibTop - 14, 9, bold, WHITE);
+  t("CONDITIONS", ML + cliW + refW + 5, ibTop - 14, 9, bold, WHITE);
+
+  // Box bodies
+  box(ML, ibTop - ibHdr - ibBody, cliW, ibBody, WHITE, rgb(0.75, 0.75, 0.75));
+  box(ML + cliW, ibTop - ibHdr - ibBody, refW, ibBody, WHITE, rgb(0.75, 0.75, 0.75));
+  box(ML + cliW + refW, ibTop - ibHdr - ibBody, condW, ibBody, WHITE, rgb(0.75, 0.75, 0.75));
+
+  const cliY = ibTop - ibHdr - 15;
+  t(client.nom, ML + 8, cliY, 9, bold, BLACK);
+  t(client.courriel, ML + 8, cliY - 13, 8, regular, DARK);
+  t(client.telephone, ML + 8, cliY - 26, 8, regular, DARK);
+  t(client.adresse, ML + 8, cliY - 39, 8, regular, DARK);
+
+  const refX = ML + cliW + 8;
+  t("Personne référence", refX, ibTop - ibHdr - 13, 8, regular, DARK);
+  t(client.personne_reference, refX, ibTop - ibHdr - 27, 9, bold, BLACK);
+
+  t("5 jours ouvrables", ML + cliW + refW + 8, ibTop - ibHdr - 13, 9, regular, BLACK);
+
+  // ── TABLE ───────────────────────────────────────────────────
+  const tblTop = ibTop - ibHdr - ibBody - 12; // small gap after info boxes
+  const tblHdrH = 20;
+  const exRowH = 16;
+  const rowH = 18;
+
+  const xDesc = ML;
+  const xNote = ML + 140;
+  const xQty  = ML + 295;
+  const xPrix = ML + 345;
+  const xMon  = ML + 430;
+  const wDesc = 140;
+  const wNote = 155;
+  const wQty  = 50;
+  const wPrix = 85;
+  const wMon  = CW - (xMon - ML); // remainder to right edge
+
+  // Table header
+  box(ML, tblTop - tblHdrH, CW, tblHdrH, BLUE);
+  t("DESCRIPTION", xDesc + 5, tblTop - 14, 9, bold, WHITE);
+  t("QTÉ", xQty + 5, tblTop - 14, 9, bold, WHITE);
+  t("PRIX UNITAIRE", xPrix + 3, tblTop - 14, 9, bold, WHITE);
+  t("MONTANT", xMon + 5, tblTop - 14, 9, bold, WHITE);
+
+  // Vertical column dividers in header
+  [xNote, xQty, xPrix, xMon].forEach(x => {
+    page.drawLine({ start: {x, y: tblTop - tblHdrH}, end: {x, y: tblTop}, thickness: 0.5, color: rgb(0.5, 0.6, 0.8) });
+  });
+
+  // Example/label row
+  box(ML, tblTop - tblHdrH - exRowH, CW, exRowH, LGRAY);
+  t("semaine du XX au XX", xDesc + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
+  t("Notes s'il y en a", xNote + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
+  t("H", xQty + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
+  t("$/h", xPrix + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
+  t("TOTAL", xMon + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
+
+  // Data rows
   const taux = client.taux_horaire ?? 0;
   let totalMinutesAll = 0;
 
-  weeks.forEach((group, i) => {
-    const y = COORDS.tableFirstY - i * COORDS.tableRowH;
-    const notes = group.entries.map((e) => e.note).filter(Boolean).join(" / ");
-    const totalMinutes = group.entries.reduce(
-      (s, e) => s + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
-    );
-    totalMinutesAll += totalMinutes;
-    const heures = (totalMinutes / 60).toFixed(2);
-    const montant = ((totalMinutes / 60) * taux).toFixed(2);
+  for (let i = 0; i < 8; i++) {
+    const ry = tblTop - tblHdrH - exRowH - (i + 1) * rowH;
+    if (i % 2 === 1) box(ML, ry, CW, rowH, LBLUE);
+    page.drawLine({ start: {x: ML, y: ry}, end: {x: ML + CW, y: ry}, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
 
-    draw(formatWeekLabel(group.monday), COORDS.colDesc, y);
-    draw(notes, COORDS.colNote, y);
-    draw(heures, COORDS.colQty, y);
-    draw(String(taux), COORDS.colPrix, y);
-    draw(montant, COORDS.colMontant, y);
+    if (i < weeks.length) {
+      const g = weeks[i];
+      const notes = g.entries.map(e => e.note).filter(Boolean).join(" / ");
+      const mins = g.entries.reduce((s, e) => s + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0);
+      totalMinutesAll += mins;
+      const hrs = (mins / 60).toFixed(2);
+      const montant = ((mins / 60) * taux).toFixed(2);
+
+      t(formatWeekLabel(g.monday), xDesc + 5, ry + 5, 8, regular, BLACK);
+      t(notes, xNote + 5, ry + 5, 8, regular, BLACK);
+      t(hrs, xQty + 5, ry + 5, 8, regular, BLACK);
+      t(String(taux), xPrix + 5, ry + 5, 8, regular, BLACK);
+      t(montant, xMon + 5, ry + 5, 8, regular, BLACK);
+    }
+  }
+
+  const tblBottom = tblTop - tblHdrH - exRowH - 8 * rowH;
+  const sousTotal = ((totalMinutesAll / 60) * taux).toFixed(2);
+
+  // SOUS-TOTAL row
+  box(ML, tblBottom - 22, CW, 22, LGRAY);
+  t("SOUS-TOTAL", xQty + 5, tblBottom - 15, 9, bold, BLACK);
+  t(sousTotal, xMon + 5, tblBottom - 15, 9, regular, BLACK);
+
+  // TOTAL row
+  box(ML, tblBottom - 44, CW, 22, BLUE);
+  t("TOTAL", xQty + 5, tblBottom - 37, 10, bold, WHITE);
+  t(sousTotal + " $", xMon + 5, tblBottom - 37, 10, bold, WHITE);
+
+  // Outer table border
+  page.drawRectangle({
+    x: ML, y: tblBottom - 44, width: CW, height: tblTop - (tblBottom - 44),
+    borderColor: rgb(0.6, 0.6, 0.6), borderWidth: 0.5, color: undefined,
   });
 
-  const sousTotal = ((totalMinutesAll / 60) * taux).toFixed(2);
-  draw(sousTotal, COORDS.soustotal.x, COORDS.soustotal.y);
-  draw(sousTotal, COORDS.total.x, COORDS.total.y);
+  // ── FOOTER ──────────────────────────────────────────────────
+  const fy = 95;
+  t("Pour toute question concernant cette facture, veuillez contacter", 155, fy + 30, 8, regular, DARK);
+  t("NOEMY BIZIER", 248, fy + 16, 10, bold, DARK);
+  t("581-999-2355", 255, fy + 3, 9, bold, DARK);
+  t("noemybizier8@gmail.com", 236, fy - 10, 9, regular, DARK);
 
   const pdfBytes = await pdfDoc.save();
   return { pdfBytes, truncated, totalWeeks };
