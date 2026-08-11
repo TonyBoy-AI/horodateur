@@ -13,6 +13,7 @@ describe("groupByWeek", () => {
     const groups = groupByWeek(entrees);
     expect(groups).toHaveLength(1);
     expect(groups[0].entries).toHaveLength(2);
+    expect(localStr(groups[0].monday)).toBe("2026-08-10");
   });
 
   it("sépare les entrées de semaines différentes", () => {
@@ -40,6 +41,10 @@ describe("groupByWeek", () => {
     ];
     const groups = groupByWeek(entrees);
     expect(localStr(groups[0].monday)).toBe("2026-08-10");
+  });
+
+  it("retourne un tableau vide si aucune entrée", () => {
+    expect(groupByWeek([])).toEqual([]);
   });
 });
 
