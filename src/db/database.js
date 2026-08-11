@@ -137,3 +137,24 @@ export async function getEntreesRecentes(limit = 10) {
     [limit]
   );
 }
+
+export async function getEntreesParPeriode({ debut, fin, client_id = null }) {
+  const d = await getDb();
+  const params = [debut, fin];
+  const clientClause = client_id ? "AND e.client_id = ?" : "";
+  if (client_id) params.push(client_id);
+  return d.select(
+    `SELECT e.id, e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
+            c.id AS client_id, c.nom AS client_nom, c.taux_horaire AS client_taux,
+            p.nom AS projet_nom
+     FROM entrees_temps e
+     LEFT JOIN clients c ON c.id = e.client_id
+     LEFT JOIN projets p ON p.id = e.projet_id
+     WHERE e.fin IS NOT NULL
+       AND e.debut >= ?
+       AND e.debut < ?
+       ${clientClause}
+     ORDER BY e.debut DESC`,
+    params
+  );
+}
