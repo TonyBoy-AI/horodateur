@@ -40,6 +40,10 @@ export default function Chrono() {
       setClientId(String(entree.clientId));
       setProjetId(entree.projetId ? String(entree.projetId) : "");
       setNoteLocal(entree.note ?? "");
+    } else {
+      setClientId("");
+      setProjetId("");
+      setNoteLocal("");
     }
   }, [entree?.id]);
 
@@ -71,7 +75,7 @@ export default function Chrono() {
           <label htmlFor="ch-client">Client *</label>
           <select
             id="ch-client"
-            value={clientId}
+            value={running ? String(entree.clientId) : clientId}
             onChange={(e) => setClientId(e.target.value)}
             disabled={running}
           >
@@ -86,7 +90,7 @@ export default function Chrono() {
           <label htmlFor="ch-projet">Projet</label>
           <select
             id="ch-projet"
-            value={projetId}
+            value={running ? String(entree.projetId ?? "") : projetId}
             onChange={(e) => setProjetId(e.target.value)}
             disabled={running}
           >

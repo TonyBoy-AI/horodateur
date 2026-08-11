@@ -69,15 +69,10 @@ export function ChronoProvider({ children }) {
   }
 
   async function setNote(texte) {
-    let currentId = null;
-    setEntree((prev) => {
-      if (!prev) return prev;
-      currentId = prev.id;
-      return { ...prev, note: texte };
-    });
-    if (currentId) {
-      await updateEntreeNote(currentId, texte).catch(console.error);
-    }
+    if (!entree) return;
+    const currentId = entree.id;
+    setEntree((prev) => prev ? { ...prev, note: texte } : prev);
+    await updateEntreeNote(currentId, texte).catch(console.error);
   }
 
   return (
