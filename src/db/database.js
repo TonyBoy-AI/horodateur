@@ -105,3 +105,11 @@ export async function getParametre(cle) {
   );
   return rows[0]?.valeur ?? null;
 }
+
+export async function setParametre(cle, valeur) {
+  const d = await getDb();
+  await d.execute(
+    "INSERT INTO parametres (cle, valeur) VALUES (?, ?) ON CONFLICT(cle) DO UPDATE SET valeur=?",
+    [cle, valeur, valeur]
+  );
+}
