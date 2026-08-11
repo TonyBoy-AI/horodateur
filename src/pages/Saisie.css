@@ -1,0 +1,176 @@
+.saisie-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.saisie-page__title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.saisie-page__form {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.saisie-page__row {
+  display: flex;
+  gap: 12px;
+}
+
+.saisie-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.saisie-page__field--full {
+  flex: none;
+  width: 100%;
+}
+
+.saisie-page__field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.saisie-page__field input,
+.saisie-page__field select,
+.saisie-page__field textarea {
+  border: 1.5px solid #c8efd8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: white;
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+
+.saisie-page__field input:focus,
+.saisie-page__field select:focus,
+.saisie-page__field textarea:focus {
+  border-color: var(--color-accent);
+}
+
+.saisie-page__field select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.saisie-page__field textarea {
+  resize: none;
+}
+
+.saisie-page__error {
+  font-size: 13px;
+  color: #e76f51;
+  font-weight: 600;
+}
+
+.saisie-page__success {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.saisie-page__btn {
+  background: var(--color-accent);
+  color: var(--color-sidebar);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: opacity 0.15s;
+  align-self: flex-start;
+}
+
+.saisie-page__btn:hover {
+  opacity: 0.85;
+}
+
+.saisie-page__recents {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+}
+
+.saisie-page__recents-title {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.saisie-page__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.saisie-page__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e8f8ee;
+}
+
+.saisie-page__item:last-child {
+  border-bottom: none;
+}
+
+.saisie-page__item-date {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  min-width: 85px;
+}
+
+.saisie-page__item-times {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  min-width: 90px;
+}
+
+.saisie-page__item-client {
+  flex: 1;
+  color: var(--color-text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saisie-page__item-duree {
+  color: var(--color-accent);
+  font-weight: 700;
+  font-family: var(--font-title);
+  font-size: 14px;
+  min-width: 48px;
+  text-align: right;
+}
