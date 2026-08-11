@@ -4,7 +4,7 @@ import { useChrono } from "../ChronoContext";
 import "./Chrono.css";
 
 function formatElapsed(debut) {
-  const secs = Math.floor((Date.now() - new Date(debut)) / 1000);
+  const secs = Math.max(0, Math.floor((Date.now() - new Date(debut)) / 1000));
   const h = String(Math.floor(secs / 3600)).padStart(2, "0");
   const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
   const s = String(secs % 60).padStart(2, "0");
@@ -71,7 +71,7 @@ export default function Chrono() {
           <label htmlFor="ch-client">Client *</label>
           <select
             id="ch-client"
-            value={running ? String(entree.clientId) : clientId}
+            value={clientId}
             onChange={(e) => setClientId(e.target.value)}
             disabled={running}
           >
@@ -86,7 +86,7 @@ export default function Chrono() {
           <label htmlFor="ch-projet">Projet</label>
           <select
             id="ch-projet"
-            value={running ? String(entree.projetId ?? "") : projetId}
+            value={projetId}
             onChange={(e) => setProjetId(e.target.value)}
             disabled={running}
           >
