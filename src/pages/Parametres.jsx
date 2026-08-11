@@ -66,12 +66,12 @@ export default function Parametres() {
               save("arrondi_minutes", e.target.value);
             }}
           >
-            <option value="1">1</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="30">30</option>
-            <option value="60">60</option>
+            <option value="1">1 minute (aucun arrondi)</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">1 heure</option>
           </select>
         </div>
 
@@ -85,11 +85,11 @@ export default function Parametres() {
               save("rappel_inactivite_heures", e.target.value);
             }}
           >
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="4">4</option>
-            <option value="8">8</option>
+            <option value="0">Désactivé</option>
+            <option value="1">1 heure</option>
+            <option value="2">2 heures</option>
+            <option value="4">4 heures</option>
+            <option value="8">8 heures</option>
           </select>
         </div>
       </section>

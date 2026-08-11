@@ -27,20 +27,20 @@ describe("Parametres", () => {
   it("affiche les 3 champs avec les valeurs chargées depuis la DB", async () => {
     render(<Parametres />);
     await waitFor(() => expect(screen.getByDisplayValue("ACME")).toBeInTheDocument());
-    expect(screen.getByDisplayValue("15")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("4")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("15 minutes")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("4 heures")).toBeInTheDocument();
   });
 
   it("sauvegarde arrondi_minutes quand le select change", async () => {
     render(<Parametres />);
-    await waitFor(() => screen.getByDisplayValue("15"));
+    await waitFor(() => screen.getByDisplayValue("15 minutes"));
     await userEvent.selectOptions(screen.getByLabelText(/arrondi/i), "30");
     expect(setParametre).toHaveBeenCalledWith("arrondi_minutes", "30");
   });
 
   it("sauvegarde rappel_inactivite_heures quand le select change", async () => {
     render(<Parametres />);
-    await waitFor(() => screen.getByDisplayValue("4"));
+    await waitFor(() => screen.getByDisplayValue("4 heures"));
     await userEvent.selectOptions(screen.getByLabelText(/rappel/i), "2");
     expect(setParametre).toHaveBeenCalledWith("rappel_inactivite_heures", "2");
   });
