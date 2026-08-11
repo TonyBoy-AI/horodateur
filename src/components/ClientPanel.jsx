@@ -14,6 +14,8 @@ const EMPTY_FORM = {
   taux_horaire: "",
   courriel: "",
   adresse: "",
+  telephone: "",
+  personne_reference: "",
   couleur: "#7FD8A0",
   actif: true,
 };
@@ -31,6 +33,8 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
         taux_horaire: client.taux_horaire,
         courriel: client.courriel ?? "",
         adresse: client.adresse ?? "",
+        telephone: client.telephone ?? "",
+        personne_reference: client.personne_reference ?? "",
         couleur: client.couleur ?? "#7FD8A0",
         actif: Boolean(client.actif),
       });
@@ -134,6 +138,28 @@ export default function ClientPanel({ client, onClose, onSaved, onDeleted }) {
             value={form.courriel}
             onChange={(e) => set("courriel", e.target.value)}
             placeholder="info@client.ca"
+          />
+        </div>
+
+        <div className="client-panel__field">
+          <label htmlFor="cp-telephone">Téléphone</label>
+          <input
+            id="cp-telephone"
+            type="tel"
+            value={form.telephone}
+            onChange={(e) => set("telephone", e.target.value)}
+            placeholder="581-000-0000"
+          />
+        </div>
+
+        <div className="client-panel__field">
+          <label htmlFor="cp-reference">Personne de référence (payeur)</label>
+          <input
+            id="cp-reference"
+            type="text"
+            value={form.personne_reference}
+            onChange={(e) => set("personne_reference", e.target.value)}
+            placeholder="Prénom Nom"
           />
         </div>
 
