@@ -89,13 +89,31 @@ describe("Factures", () => {
     await waitFor(() => expect(screen.getByText("1h30")).toBeInTheDocument());
   });
 
-  it("affiche le bouton PDF sur chaque facture dans la liste", async () => {
+  it("le bouton PDF télécharge la facture existante", async () => {
     getFactures.mockResolvedValue([{
       id: 1, client_id: 1, numero: "F-2026-001", client_nom: "Studio Lumière",
       date_emission: "2026-08-11", montant_total: 120, statut: "impayee",
     }]);
     render(<Factures />);
-    await waitFor(() => expect(screen.getByText("📄 PDF")).toBeInTheDocument());
+    const btn = await screen.findByText("📄 PDF");
+    await userEvent.click(btn);
+    await waitFor(() => expect(downloadPdf).toHaveBeenCalled());
+  });
+
+  it("affiche un avertissement quand la facture est tronquée à 8 semaines", async () => {
+    generatePdf.mockResolvedValueOnce({ pdfBytes: new Uint8Array(), truncated: true, totalWeeks: 12 });
+    getEntreesSansFacture.mockResolvedValue([{
+      id: 1, debut: "2026-08-10T09:00:00", fin: "2026-08-10T11:00:00",
+      duree_minutes: 120, duree_arrondie_minutes: 120, note: null, projet_nom: null,
+    }]);
+    render(<Factures />);
+    await userEvent.click(screen.getByText("+ Nouvelle facture"));
+    await userEvent.selectOptions(screen.getByLabelText(/client/i), "1");
+    await waitFor(() => expect(getEntreesSansFacture).toHaveBeenCalledWith(1));
+    await userEvent.click(screen.getByText("Créer la facture"));
+    await waitFor(() =>
+      expect(screen.getByText(/seulement 8 semaines sur 12/i)).toBeInTheDocument()
+    );
   });
 
   it("appelle generatePdf et downloadPdf à la création d'une facture", async () => {

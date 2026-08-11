@@ -81,7 +81,8 @@ export default function Factures() {
     (sum, e) => sum + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
   );
   const montantTotal = (totalMinutes / 60) * taux;
-  const willTruncate = groupByWeek(selectedEntrees).length > 8;
+  const weekCount = groupByWeek(selectedEntrees).length;
+  const willTruncate = weekCount > 8;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -220,7 +221,7 @@ export default function Factures() {
 
               {willTruncate && (
                 <p className="factures-panel__warning">
-                  {`${groupByWeek(selectedEntrees).length} semaines détectées — seulement les 8 premières seront dans le PDF.`}
+                  {`${weekCount} semaines détectées — seulement les 8 premières seront dans le PDF.`}
                 </p>
               )}
 
