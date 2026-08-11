@@ -63,6 +63,7 @@ export default function Factures() {
     setEntrees([]);
     setSelectedIds(new Set());
     setNumero(autoNumero(factures.length));
+    setPdfWarning(null);
     setPanelOpen(true);
   }
 
@@ -93,15 +94,20 @@ export default function Factures() {
       const date_emission = new Date().toISOString().slice(0, 10);
       const id = await createFacture({ client_id: Number(clientId), numero, date_emission, montant_total: montantTotal });
       await linkEntreesToFacture(id, [...selectedIds]);
-      const { pdfBytes, truncated, totalWeeks } = await generatePdf(
-        { id, numero, date_emission },
-        clientObj,
-        selectedEntrees
-      );
-      downloadPdf(pdfBytes, `${numero}.pdf`);
       setPanelOpen(false);
-      if (truncated) setPdfWarning(`Attention : seulement 8 semaines sur ${totalWeeks} ont été incluses dans le PDF.`);
       loadFactures();
+      try {
+        const { pdfBytes, truncated, totalWeeks } = await generatePdf(
+          { id, numero, date_emission },
+          clientObj,
+          selectedEntrees
+        );
+        downloadPdf(pdfBytes, `${numero}.pdf`);
+        if (truncated) setPdfWarning(`Attention : seulement 8 semaines sur ${totalWeeks} ont été incluses dans le PDF.`);
+      } catch (pdfErr) {
+        console.error(pdfErr);
+        setPdfWarning(`La facture ${numero} a été créée. Le PDF n'a pas pu être généré — utilisez le bouton 📄 PDF pour réessayer.`);
+      }
     } catch (err) {
       console.error(err);
       setError("Une erreur est survenue. Veuillez réessayer.");
