@@ -84,7 +84,7 @@ export async function generatePdf(facture, client, entrees) {
   draw(client.personne_reference, COORDS.persRef.x, COORDS.persRef.y);
 
   const taux = client.taux_horaire ?? 0;
-  let sousTotal = 0;
+  let totalMinutesAll = 0;
 
   weeks.forEach((group, i) => {
     const y = COORDS.tableFirstY - i * COORDS.tableRowH;
@@ -92,9 +92,9 @@ export async function generatePdf(facture, client, entrees) {
     const totalMinutes = group.entries.reduce(
       (s, e) => s + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
     );
+    totalMinutesAll += totalMinutes;
     const heures = (totalMinutes / 60).toFixed(2);
     const montant = ((totalMinutes / 60) * taux).toFixed(2);
-    sousTotal += parseFloat(montant);
 
     draw(formatWeekLabel(group.monday), COORDS.colDesc, y);
     draw(notes, COORDS.colNote, y);
@@ -103,8 +103,9 @@ export async function generatePdf(facture, client, entrees) {
     draw(montant, COORDS.colMontant, y);
   });
 
-  draw(sousTotal.toFixed(2), COORDS.soustotal.x, COORDS.soustotal.y);
-  draw(sousTotal.toFixed(2), COORDS.total.x, COORDS.total.y);
+  const sousTotal = ((totalMinutesAll / 60) * taux).toFixed(2);
+  draw(sousTotal, COORDS.soustotal.x, COORDS.soustotal.y);
+  draw(sousTotal, COORDS.total.x, COORDS.total.y);
 
   const pdfBytes = await pdfDoc.save();
   return { pdfBytes, truncated, totalWeeks };
