@@ -113,3 +113,27 @@ export async function setParametre(cle, valeur) {
     [cle, valeur, valeur]
   );
 }
+
+export async function createEntreeComplete({ client_id, projet_id, debut, fin, duree_minutes, duree_arrondie_minutes, note }) {
+  const d = await getDb();
+  const result = await d.execute(
+    "INSERT INTO entrees_temps (client_id, projet_id, debut, fin, duree_minutes, duree_arrondie_minutes, note) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [client_id, projet_id ?? null, debut, fin, duree_minutes, duree_arrondie_minutes ?? null, note || null]
+  );
+  return result.lastInsertId;
+}
+
+export async function getEntreesRecentes(limit = 10) {
+  const d = await getDb();
+  return d.select(
+    `SELECT e.id, e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
+            c.nom AS client_nom, p.nom AS projet_nom
+     FROM entrees_temps e
+     LEFT JOIN clients c ON c.id = e.client_id
+     LEFT JOIN projets p ON p.id = e.projet_id
+     WHERE e.fin IS NOT NULL
+     ORDER BY e.debut DESC
+     LIMIT ?`,
+    [limit]
+  );
+}
