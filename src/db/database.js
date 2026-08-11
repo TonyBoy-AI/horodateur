@@ -20,20 +20,20 @@ export async function getProjetsByClient(clientId) {
   );
 }
 
-export async function createClient({ nom, taux_horaire, courriel, adresse, couleur, actif }) {
+export async function createClient({ nom, taux_horaire, courriel, adresse, telephone, personne_reference, couleur, actif }) {
   const d = await getDb();
   const result = await d.execute(
-    "INSERT INTO clients (nom, taux_horaire, courriel, adresse, couleur, actif) VALUES (?, ?, ?, ?, ?, ?)",
-    [nom, taux_horaire, courriel || null, adresse || null, couleur || "#7FD8A0", actif ? 1 : 0]
+    "INSERT INTO clients (nom, taux_horaire, courriel, adresse, telephone, personne_reference, couleur, actif) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [nom, taux_horaire, courriel || null, adresse || null, telephone || null, personne_reference || null, couleur || "#7FD8A0", actif ? 1 : 0]
   );
   return result.lastInsertId;
 }
 
-export async function updateClient(id, { nom, taux_horaire, courriel, adresse, couleur, actif }) {
+export async function updateClient(id, { nom, taux_horaire, courriel, adresse, telephone, personne_reference, couleur, actif }) {
   const d = await getDb();
   await d.execute(
-    "UPDATE clients SET nom=?, taux_horaire=?, courriel=?, adresse=?, couleur=?, actif=? WHERE id=?",
-    [nom, taux_horaire, courriel || null, adresse || null, couleur || "#7FD8A0", actif ? 1 : 0, id]
+    "UPDATE clients SET nom=?, taux_horaire=?, courriel=?, adresse=?, telephone=?, personne_reference=?, couleur=?, actif=? WHERE id=?",
+    [nom, taux_horaire, courriel || null, adresse || null, telephone || null, personne_reference || null, couleur || "#7FD8A0", actif ? 1 : 0, id]
   );
 }
 
@@ -162,7 +162,7 @@ export async function getEntreesParPeriode({ debut, fin, client_id = null }) {
 export async function getFactures() {
   const d = await getDb();
   return d.select(
-    `SELECT f.id, f.numero, f.date_emission, f.montant_total, f.statut,
+    `SELECT f.id, f.client_id, f.numero, f.date_emission, f.montant_total, f.statut,
             c.nom AS client_nom
      FROM factures f
      LEFT JOIN clients c ON c.id = f.client_id
@@ -202,4 +202,15 @@ export async function linkEntreesToFacture(facture_id, entree_ids) {
 export async function updateFactureStatut(id, statut) {
   const d = await getDb();
   await d.execute("UPDATE factures SET statut=? WHERE id=?", [statut, id]);
+}
+
+export async function getEntreesParFacture(facture_id) {
+  const d = await getDb();
+  return d.select(
+    `SELECT id, debut, fin, duree_minutes, duree_arrondie_minutes, note
+     FROM entrees_temps
+     WHERE facture_id = ? AND fin IS NOT NULL
+     ORDER BY debut ASC`,
+    [facture_id]
+  );
 }
