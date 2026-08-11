@@ -34,25 +34,30 @@ export function formatWeekLabel(monday) {
 }
 
 // Coordonnées en points (72pt = 1 pouce), origine bas-gauche.
-// Valeurs initiales — à calibrer visuellement via le bouton Calibration PDF dans l'app.
 const COORDS = {
   numero:        { x: 390, y: 703 },
   date:          { x: 498, y: 703 },
-  nomEntreprise: { x: 42,  y: 636 },
-  courriel:      { x: 42,  y: 619 },
-  telephone:     { x: 42,  y: 602 },
-  adresse:       { x: 42,  y: 585 },
-  persRef:       { x: 374, y: 636 },
-  tableFirstY:   474,
+  nomEntreprise: { x: 42,  y: 653 },
+  courriel:      { x: 42,  y: 636 },
+  telephone:     { x: 42,  y: 619 },
+  adresse:       { x: 42,  y: 602 },
+  persRef:       { x: 374, y: 653 },
+  tableFirstY:   527,
   tableRowH:     17.5,
   colDesc:       42,
   colNote:       185,
   colQty:        358,
   colPrix:       420,
   colMontant:    500,
-  soustotal:     { x: 500, y: 118 },
-  total:         { x: 500, y: 96  },
+  soustotal:     { x: 500, y: 329 },
+  total:         { x: 500, y: 309 },
 };
+
+function formatDateFR(isoStr) {
+  if (!isoStr) return "";
+  const [y, m, d] = isoStr.split("-");
+  return `${parseInt(d)}-${parseInt(m)}-${y}`;
+}
 
 export async function generatePdf(facture, client, entrees) {
   const allWeeks = groupByWeek(entrees);
@@ -76,7 +81,7 @@ export async function generatePdf(facture, client, entrees) {
   };
 
   draw(facture.numero, COORDS.numero.x, COORDS.numero.y);
-  draw(facture.date_emission, COORDS.date.x, COORDS.date.y);
+  draw(formatDateFR(facture.date_emission), COORDS.date.x, COORDS.date.y);
   draw(client.nom, COORDS.nomEntreprise.x, COORDS.nomEntreprise.y);
   draw(client.courriel, COORDS.courriel.x, COORDS.courriel.y);
   draw(client.telephone, COORDS.telephone.x, COORDS.telephone.y);
