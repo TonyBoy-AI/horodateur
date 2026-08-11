@@ -1,7 +1,98 @@
+import { useState, useEffect } from "react";
+import { getParametre, setParametre } from "../db/database";
+import "./Parametres.css";
+
 export default function Parametres() {
+  const [nomEntreprise, setNomEntreprise] = useState("");
+  const [arrondi, setArrondi] = useState(null);
+  const [rappel, setRappel] = useState(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      getParametre("nom_entreprise"),
+      getParametre("arrondi_minutes"),
+      getParametre("rappel_inactivite_heures"),
+    ])
+      .then(([nom, arr, rap]) => {
+        setNomEntreprise(nom ?? "");
+        setArrondi(arr ?? "15");
+        setRappel(rap ?? "4");
+      })
+      .catch(console.error);
+  }, []);
+
+  async function save(cle, valeur) {
+    await setParametre(cle, valeur).catch(console.error);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  }
+
   return (
-    <p style={{ fontFamily: "var(--font-title)", fontSize: 22, color: "var(--color-text)" }}>
-      ⚙️ Paramètres — à venir
-    </p>
+    <div className="parametres-page">
+      <h1 className="parametres-page__title">⚙️ Paramètres</h1>
+
+      {saved && (
+        <p className="parametres-page__saved" role="status">
+          ✓ Sauvegardé
+        </p>
+      )}
+
+      <section className="parametres-page__section">
+        <h2 className="parametres-page__section-title">Entreprise</h2>
+        <div className="parametres-page__field">
+          <label htmlFor="p-nom">Nom de l'entreprise</label>
+          <input
+            id="p-nom"
+            type="text"
+            value={nomEntreprise}
+            onChange={(e) => setNomEntreprise(e.target.value)}
+            onBlur={() => save("nom_entreprise", nomEntreprise)}
+            placeholder="Ex: Studio Créatif"
+          />
+        </div>
+      </section>
+
+      <section className="parametres-page__section">
+        <h2 className="parametres-page__section-title">Chronomètre</h2>
+
+        <div className="parametres-page__field">
+          <label htmlFor="p-arrondi">Arrondi des durées</label>
+          <select
+            id="p-arrondi"
+            value={arrondi ?? "15"}
+            onChange={(e) => {
+              setArrondi(e.target.value);
+              save("arrondi_minutes", e.target.value);
+            }}
+          >
+            <option value="1">1</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="60">60</option>
+          </select>
+        </div>
+
+        <div className="parametres-page__field">
+          <label htmlFor="p-rappel">Rappel d'inactivité</label>
+          <select
+            id="p-rappel"
+            value={rappel ?? "4"}
+            onChange={(e) => {
+              setRappel(e.target.value);
+              save("rappel_inactivite_heures", e.target.value);
+            }}
+          >
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </section>
+    </div>
   );
 }

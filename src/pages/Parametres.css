@@ -1,0 +1,72 @@
+.parametres-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.parametres-page__title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.parametres-page__saved {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.parametres-page__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+}
+
+.parametres-page__section-title {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parametres-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.parametres-page__field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.parametres-page__field input,
+.parametres-page__field select {
+  border: 1.5px solid #c8efd8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: white;
+  outline: none;
+  font-family: var(--font-body);
+  transition: border-color 0.15s;
+}
+
+.parametres-page__field input:focus,
+.parametres-page__field select:focus {
+  border-color: var(--color-accent);
+}
