@@ -12,6 +12,7 @@ import {
   createFacture,
   linkEntreesToFacture,
   updateFactureStatut,
+  getFacturesParClient,
 } from "../src/db/database";
 
 let mockDb;
@@ -81,5 +82,26 @@ describe("updateFactureStatut", () => {
       "UPDATE factures SET statut=? WHERE id=?",
       ["payee", 3]
     );
+  });
+});
+
+describe("getFacturesParClient", () => {
+  it("retourne les factures filtrées par client_id", async () => {
+    const mockRows = [
+      { id: 1, numero: "F-2026-001", date_emission: "2026-08-11", montant_total: 120, statut: "impayee" },
+    ];
+    mockDb.select.mockResolvedValue(mockRows);
+    const rows = await getFacturesParClient(5);
+    expect(rows).toEqual(mockRows);
+    expect(mockDb.select).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE client_id = ?"),
+      [5]
+    );
+  });
+
+  it("retourne un tableau vide si pas de factures", async () => {
+    mockDb.select.mockResolvedValue([]);
+    const rows = await getFacturesParClient(99);
+    expect(rows).toEqual([]);
   });
 });

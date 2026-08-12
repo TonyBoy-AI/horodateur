@@ -214,3 +214,14 @@ export async function getEntreesParFacture(facture_id) {
     [facture_id]
   );
 }
+
+export async function getFacturesParClient(client_id) {
+  const d = await getDb();
+  return d.select(
+    `SELECT id, numero, date_emission, montant_total, statut
+     FROM factures
+     WHERE client_id = ?
+     ORDER BY date_emission DESC`,
+    [client_id]
+  );
+}
