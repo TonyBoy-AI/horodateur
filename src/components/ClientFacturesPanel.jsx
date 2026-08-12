@@ -4,7 +4,7 @@ import "./ClientFacturesPanel.css";
 
 function formatDate(isoStr) {
   if (!isoStr) return "—";
-  const [y, m, d] = isoStr.split("-");
+  const [y, m, d] = isoStr.slice(0, 10).split("-");
   return `${parseInt(d)}-${parseInt(m)}-${y}`;
 }
 
@@ -16,6 +16,7 @@ export default function ClientFacturesPanel({ client, factures }) {
       downloadPdf(pdfBytes, `${facture.numero}.pdf`);
     } catch (err) {
       console.error(err);
+      alert("Impossible de générer le PDF. Veuillez réessayer.");
     }
   }
 
@@ -36,7 +37,7 @@ export default function ClientFacturesPanel({ client, factures }) {
                   <span className="client-factures-panel__date">{formatDate(f.date_emission)}</span>
                 </div>
                 <div className="client-factures-panel__item-sub">
-                  <span className="client-factures-panel__montant">{f.montant_total.toFixed(2)} $</span>
+                  <span className="client-factures-panel__montant">{(f.montant_total ?? 0).toFixed(2)} $</span>
                   <span className={`client-factures-panel__badge client-factures-panel__badge--${f.statut}`}>
                     {f.statut === "payee" ? "Payée" : "Impayée"}
                   </span>
