@@ -12,6 +12,6 @@
     "sql:allow-load",
     "updater:default",
     "process:default",
-    "process:allow-relaunch"
+    "process:allow-restart"
   ]
 }
