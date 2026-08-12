@@ -86,25 +86,25 @@ export async function generatePdf(facture, client, entrees) {
   t("581-999-2355", ML, 707, 9, bold, DARK);
   t("noemybizier8@gmail.com", ML, 694, 9, regular, DARK);
 
-  // N° FACTURE | DATE boxes (right side)
+  // N° FACTURE | DATE boxes (right side, aligned with phone/email rows)
   const bx = 380; // box area starts here
   const bw = CW - (bx - ML); // width = 577 - 380 = 197
   const hw = bw / 2; // half width
 
   // Headers
-  box(bx, 734, hw, 24, BLUE); // N° FACTURE header
-  box(bx + hw, 734, hw, 24, BLUE); // DATE header
-  t("N° FACTURE", bx + 5, 743, 8, bold, WHITE);
-  t("DATE", bx + hw + 5, 743, 8, bold, WHITE);
+  box(bx, 700, hw, 24, BLUE); // N° FACTURE header
+  box(bx + hw, 700, hw, 24, BLUE); // DATE header
+  t("N° FACTURE", bx + 5, 709, 8, bold, WHITE);
+  t("DATE", bx + hw + 5, 709, 8, bold, WHITE);
 
   // Values
-  box(bx, 710, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
-  box(bx + hw, 710, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
-  t(facture.numero, bx + 5, 719, 9, bold, BLACK);
-  t(formatDateFR(facture.date_emission), bx + hw + 5, 719, 9, regular, BLACK);
+  box(bx, 676, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
+  box(bx + hw, 676, hw, 24, WHITE, rgb(0.7, 0.7, 0.7));
+  t(facture.numero, bx + 5, 685, 9, bold, BLACK);
+  t(formatDateFR(facture.date_emission), bx + hw + 5, 685, 9, regular, BLACK);
 
   // ── FACTURER À / RÉF CLIENT / CONDITIONS ────────────────────
-  const ibTop = 693; // info boxes top y (bottom of N° FACTURE value box area)
+  const ibTop = 580; // info boxes top y
   const ibHdr = 20; // header height
   const ibBody = 75; // content height
   const cliW = 210;
@@ -116,7 +116,7 @@ export async function generatePdf(facture, client, entrees) {
   box(ML + cliW, ibTop - ibHdr, refW, ibHdr, BLUE);
   box(ML + cliW + refW, ibTop - ibHdr, condW, ibHdr, BLUE);
   t("FACTURER À", ML + 5, ibTop - 14, 9, bold, WHITE);
-  t("RÉF CLIENT", ML + cliW + 5, ibTop - 14, 9, bold, WHITE);
+  t("PERSONNE RÉFÉRENCE", ML + cliW + 5, ibTop - 14, 7.5, bold, WHITE);
   t("CONDITIONS", ML + cliW + refW + 5, ibTop - 14, 9, bold, WHITE);
 
   // Box bodies
@@ -131,8 +131,7 @@ export async function generatePdf(facture, client, entrees) {
   t(client.adresse, ML + 8, cliY - 39, 8, regular, DARK);
 
   const refX = ML + cliW + 8;
-  t("Personne référence", refX, ibTop - ibHdr - 13, 8, regular, DARK);
-  t(client.personne_reference, refX, ibTop - ibHdr - 27, 9, bold, BLACK);
+  t(client.personne_reference, refX, ibTop - ibHdr - 13, 9, bold, BLACK);
 
   t("5 jours ouvrables", ML + cliW + refW + 8, ibTop - ibHdr - 13, 9, regular, BLACK);
 
