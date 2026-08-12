@@ -12,6 +12,7 @@ export default function ClientCard({ client, isSelected, onClick }) {
   return (
     <div
       className={classes}
+      style={{ borderColor: isSelected ? client.couleur : "transparent" }}
       onClick={onClick}
       role="button"
       aria-pressed={isSelected}

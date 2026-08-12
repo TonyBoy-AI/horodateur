@@ -16,7 +16,7 @@
 }
 
 .client-card--selected {
-  border-color: var(--color-accent);
+  /* border-color driven by client.couleur via inline style */
 }
 
 .client-card--inactive {
