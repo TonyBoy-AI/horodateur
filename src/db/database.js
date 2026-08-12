@@ -238,7 +238,12 @@ export async function updateEntree(id, { client_id, projet_id, debut, fin, duree
 
 export async function deleteEntree(id) {
   const d = await getDb();
-  const rows = await d.select("SELECT facture_id FROM entrees_temps WHERE id = ?", [id]);
-  if (rows[0]?.facture_id) throw new Error("Cette entrée est liée à une facture.");
-  await d.execute("DELETE FROM entrees_temps WHERE id = ?", [id]);
+  const result = await d.execute(
+    "DELETE FROM entrees_temps WHERE id = ? AND facture_id IS NULL",
+    [id]
+  );
+  if (result.rowsAffected === 0) {
+    const rows = await d.select("SELECT facture_id FROM entrees_temps WHERE id = ?", [id]);
+    if (rows[0]?.facture_id) throw new Error("Cette entrée est liée à une facture.");
+  }
 }

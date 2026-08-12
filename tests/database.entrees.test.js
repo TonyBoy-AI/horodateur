@@ -53,19 +53,24 @@ describe("updateEntree", () => {
 
 describe("deleteEntree", () => {
   it("supprime l'entrée si elle n'est pas facturée", async () => {
-    mockDb.select.mockResolvedValue([{ facture_id: null }]);
-    mockDb.execute.mockResolvedValue({});
+    mockDb.execute.mockResolvedValue({ rowsAffected: 1 });
     await deleteEntree(3);
     expect(mockDb.execute).toHaveBeenCalledWith(
-      "DELETE FROM entrees_temps WHERE id = ?",
+      "DELETE FROM entrees_temps WHERE id = ? AND facture_id IS NULL",
       [3]
     );
   });
 
   it("lance une erreur si l'entrée est liée à une facture", async () => {
+    mockDb.execute.mockResolvedValue({ rowsAffected: 0 });
     mockDb.select.mockResolvedValue([{ facture_id: 7 }]);
     await expect(deleteEntree(3)).rejects.toThrow("liée à une facture");
-    expect(mockDb.execute).not.toHaveBeenCalled();
+  });
+
+  it("ne lance pas d'erreur si l'entrée n'existe pas (idempotent)", async () => {
+    mockDb.execute.mockResolvedValue({ rowsAffected: 0 });
+    mockDb.select.mockResolvedValue([]); // aucune ligne retournée
+    await expect(deleteEntree(99)).resolves.toBeUndefined();
   });
 });
 
