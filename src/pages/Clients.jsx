@@ -46,10 +46,10 @@ export default function Clients() {
     setShowNew(false);
   }
 
-  async function handleSaved(id) {
+  async function handleSaved() {
     await loadClients();
     setShowNew(false);
-    setSelectedId(id);
+    setSelectedId(null);
   }
 
   async function handleDeleted() {
