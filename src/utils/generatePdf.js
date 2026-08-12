@@ -39,7 +39,7 @@ function formatDateFR(isoStr) {
   return `${parseInt(d)}-${parseInt(m)}-${y}`;
 }
 
-export async function generatePdf(facture, client, entrees) {
+export async function generatePdf(facture, client, entrees, emetteur = {}) {
   const allWeeks = groupByWeek(entrees);
   const truncated = allWeeks.length > 8;
   const totalWeeks = allWeeks.length;
@@ -77,14 +77,20 @@ export async function generatePdf(facture, client, entrees) {
     });
   };
 
+  const nomEmetteur = emetteur.nom || "NOÉMY BIZIER- COMPTABLE";
+  const adr1 = emetteur.adresse_ligne1 || "425 RUE DES CHÊNES EST, app. 2";
+  const adr2 = emetteur.adresse_ligne2 || "G1J 1K5, QC, QUÉBEC";
+  const telEmetteur = emetteur.telephone || "581-999-2355";
+  const courrielEmetteur = emetteur.courriel || "noemybizier8@gmail.com";
+
   // ── HEADER ──────────────────────────────────────────────────
-  t("NOÉMY BIZIER- COMPTABLE", ML, 755, 14, bold, BLUE);
+  t(nomEmetteur.toUpperCase(), ML, 755, 14, bold, BLUE);
   t("FACTURE", 430, 748, 34, bold, BLUE);
 
-  t("425 RUE DES CHÊNES EST, app. 2", ML, 733, 9, regular, DARK);
-  t("G1J 1K5, QC, QUÉBEC", ML, 720, 9, regular, DARK);
-  t("581-999-2355", ML, 707, 9, bold, DARK);
-  t("noemybizier8@gmail.com", ML, 694, 9, regular, DARK);
+  t(adr1, ML, 733, 9, regular, DARK);
+  t(adr2, ML, 720, 9, regular, DARK);
+  t(telEmetteur, ML, 707, 9, bold, DARK);
+  t(courrielEmetteur, ML, 694, 9, regular, DARK);
 
   // N° FACTURE | DATE boxes (right side, aligned with phone/email rows)
   const bx = 380; // box area starts here
@@ -219,9 +225,9 @@ export async function generatePdf(facture, client, entrees) {
   // ── FOOTER ──────────────────────────────────────────────────
   const fy = 95;
   t("Pour toute question concernant cette facture, veuillez contacter", 155, fy + 30, 8, regular, DARK);
-  t("NOEMY BIZIER", 248, fy + 16, 10, bold, DARK);
-  t("581-999-2355", 255, fy + 3, 9, bold, DARK);
-  t("noemybizier8@gmail.com", 236, fy - 10, 9, regular, DARK);
+  t(nomEmetteur.toUpperCase(), 248, fy + 16, 10, bold, DARK);
+  t(telEmetteur, 255, fy + 3, 9, bold, DARK);
+  t(courrielEmetteur, 236, fy - 10, 9, regular, DARK);
 
   const pdfBytes = await pdfDoc.save();
   return { pdfBytes, truncated, totalWeeks };

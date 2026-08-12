@@ -7,6 +7,7 @@ import {
   linkEntreesToFacture,
   updateFactureStatut,
   getEntreesParFacture,
+  getParametre,
 } from "../db/database";
 import { generatePdf, downloadPdf, groupByWeek } from "../utils/generatePdf";
 import "./Factures.css";
@@ -85,6 +86,17 @@ export default function Factures() {
   const weekCount = groupByWeek(selectedEntrees).length;
   const willTruncate = weekCount > 8;
 
+  async function loadEmetteur() {
+    const [nom, adr1, adr2, tel, courriel] = await Promise.all([
+      getParametre("nom_entreprise"),
+      getParametre("adresse_ligne1"),
+      getParametre("adresse_ligne2"),
+      getParametre("telephone_entreprise"),
+      getParametre("courriel_entreprise"),
+    ]);
+    return { nom, adresse_ligne1: adr1, adresse_ligne2: adr2, telephone: tel, courriel };
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!clientId || selectedIds.size === 0 || !numero) return;
@@ -97,10 +109,12 @@ export default function Factures() {
       setPanelOpen(false);
       loadFactures();
       try {
+        const emetteur = await loadEmetteur();
         const { pdfBytes, truncated, totalWeeks } = await generatePdf(
           { id, numero, date_emission },
           clientObj,
-          selectedEntrees
+          selectedEntrees,
+          emetteur
         );
         downloadPdf(pdfBytes, `${numero}.pdf`);
         if (truncated) setPdfWarning(`Attention : seulement 8 semaines sur ${totalWeeks} ont été incluses dans le PDF.`);
@@ -121,7 +135,8 @@ export default function Factures() {
       const client = clients.find((c) => c.id === facture.client_id);
       if (!client) throw new Error("Client introuvable");
       const entries = await getEntreesParFacture(facture.id);
-      const { pdfBytes } = await generatePdf(facture, client, entries);
+      const emetteur = await loadEmetteur();
+      const { pdfBytes } = await generatePdf(facture, client, entries, emetteur);
       downloadPdf(pdfBytes, `${facture.numero}.pdf`);
     } catch (err) {
       console.error(err);
