@@ -245,3 +245,29 @@
   text-align: center;
   padding: 24px 0;
 }
+
+.rapports-page__body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.rapports-page__list {
+  flex: 1;
+  min-width: 0;
+}
+
+.rapports-page__item {
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.rapports-page__item:hover {
+  background: #f5fdf8;
+}
+
+.rapports-page__item--selected {
+  border-left-color: var(--color-accent);
+  background: #f0faf5;
+}

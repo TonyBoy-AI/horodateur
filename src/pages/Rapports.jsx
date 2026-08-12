@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getClients, getEntreesParPeriode } from "../db/database";
+import EntreePanel from "../components/EntreePanel";
 import "./Rapports.css";
 
 function getWeekRange() {
@@ -60,12 +61,14 @@ export default function Rapports() {
   const [dateDebut, setDateDebut] = useState(() => getMonthRange().debut);
   const [dateFin, setDateFin] = useState(() => getMonthRange().fin);
   const [entrees, setEntrees] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     getClients().then(setClients).catch(console.error);
   }, []);
 
   useEffect(() => {
+    setSelectedId(null);
     let debut, fin;
     if (periode === "semaine") {
       ({ debut, fin } = getWeekRange());
@@ -85,7 +88,28 @@ export default function Rapports() {
       .catch(console.error);
   }, [periode, dateDebut, dateFin, clientFilter]);
 
+  function loadEntrees() {
+    let debut, fin;
+    if (periode === "semaine") {
+      ({ debut, fin } = getWeekRange());
+    } else if (periode === "mois") {
+      ({ debut, fin } = getMonthRange());
+    } else {
+      debut = dateDebut;
+      fin = dateFin;
+    }
+    if (!debut || !fin) return;
+    getEntreesParPeriode({
+      debut: `${debut}T00:00:00`,
+      fin: `${fin}T00:00:00`,
+      client_id: clientFilter ? Number(clientFilter) : null,
+    })
+      .then(setEntrees)
+      .catch(console.error);
+  }
+
   const { totalMinutes, byClient } = computeResume(entrees);
+  const selectedEntree = entrees.find((e) => e.id === selectedId) ?? null;
 
   return (
     <div className="rapports-page">
@@ -163,20 +187,40 @@ export default function Rapports() {
       {entrees.length > 0 ? (
         <section className="rapports-page__entries">
           <h2 className="rapports-page__entries-title">Détail des entrées</h2>
-          <ul className="rapports-page__list">
-            {entrees.map((e) => (
-              <li key={e.id} className="rapports-page__item">
-                <span className="rapports-page__item-date">{formatDate(e.debut)}</span>
-                <span className="rapports-page__item-client">
-                  {clients.length > 1 ? `${e.client_nom}${e.projet_nom ? ` · ${e.projet_nom}` : ""}` : (e.projet_nom || "—")}
-                </span>
-                <span className="rapports-page__item-duree">
-                  {formatDuration(e.duree_arrondie_minutes ?? e.duree_minutes)}
-                </span>
-                {e.note && <span className="rapports-page__item-note">{e.note}</span>}
-              </li>
-            ))}
-          </ul>
+          <div className="rapports-page__body">
+            <ul className="rapports-page__list">
+              {entrees.map((e) => (
+                <li
+                  key={e.id}
+                  className={`rapports-page__item${selectedId === e.id ? " rapports-page__item--selected" : ""}`}
+                  onClick={() => setSelectedId((prev) => (prev === e.id ? null : e.id))}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(ev) => ev.key === "Enter" && setSelectedId((prev) => (prev === e.id ? null : e.id))}
+                >
+                  <span className="rapports-page__item-date">{formatDate(e.debut)}</span>
+                  <span className="rapports-page__item-client">
+                    {clients.length > 1 ? `${e.client_nom}${e.projet_nom ? ` · ${e.projet_nom}` : ""}` : (e.projet_nom || "—")}
+                  </span>
+                  <span className="rapports-page__item-duree">
+                    {formatDuration(e.duree_arrondie_minutes ?? e.duree_minutes)}
+                  </span>
+                  {e.note && <span className="rapports-page__item-note">{e.note}</span>}
+                </li>
+              ))}
+            </ul>
+
+            {selectedEntree && (
+              <EntreePanel
+                key={selectedEntree.id}
+                entree={selectedEntree}
+                clients={clients}
+                onSaved={() => { setSelectedId(null); loadEntrees(); }}
+                onDeleted={() => { setSelectedId(null); loadEntrees(); }}
+                onClose={() => setSelectedId(null)}
+              />
+            )}
+          </div>
         </section>
       ) : (
         <p className="rapports-page__empty">Aucune entrée pour cette période.</p>
