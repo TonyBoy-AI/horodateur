@@ -77,7 +77,7 @@ export default function EntreePanel({ entree, clients, onSaved, onDeleted, onClo
     <aside className="entree-panel">
       <div className="entree-panel__header">
         <h2 className="entree-panel__title">Modifier l'entrée</h2>
-        <button className="entree-panel__close" onClick={onClose} aria-label="✕">✕</button>
+        <button className="entree-panel__close" onClick={onClose} aria-label="Fermer">✕</button>
       </div>
 
       <div className="entree-panel__body">

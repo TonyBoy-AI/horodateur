@@ -139,6 +139,9 @@
   font-size: 13px;
   padding: 8px 0;
   border-bottom: 1px solid #e8f8ee;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .saisie-page__item:last-child {
@@ -184,12 +187,6 @@
 .saisie-page__body .saisie-page__list {
   flex: 1;
   min-width: 0;
-}
-
-.saisie-page__item {
-  cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: border-color 0.15s, background 0.15s;
 }
 
 .saisie-page__item:hover {

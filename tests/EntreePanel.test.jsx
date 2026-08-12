@@ -76,10 +76,10 @@ describe("EntreePanel", () => {
     expect(screen.getByRole("button", { name: /supprimer/i })).toBeDisabled();
   });
 
-  it("appelle onClose quand on clique ✕", async () => {
+  it("appelle onClose quand on clique Fermer", async () => {
     const onClose = vi.fn();
     render(<EntreePanel entree={entree} clients={clients} onSaved={vi.fn()} onDeleted={vi.fn()} onClose={onClose} />);
-    fireEvent.click(screen.getByLabelText("✕"));
+    fireEvent.click(screen.getByLabelText("Fermer"));
     expect(onClose).toHaveBeenCalled();
   });
 });
