@@ -126,7 +126,8 @@ export async function createEntreeComplete({ client_id, projet_id, debut, fin, d
 export async function getEntreesRecentes(limit = 10) {
   const d = await getDb();
   return d.select(
-    `SELECT e.id, e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
+    `SELECT e.id, e.client_id, e.projet_id, e.facture_id,
+            e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
             c.nom AS client_nom, p.nom AS projet_nom
      FROM entrees_temps e
      LEFT JOIN clients c ON c.id = e.client_id
@@ -144,8 +145,9 @@ export async function getEntreesParPeriode({ debut, fin, client_id = null }) {
   const clientClause = client_id ? "AND e.client_id = ?" : "";
   if (client_id) params.push(client_id);
   return d.select(
-    `SELECT e.id, e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
-            c.id AS client_id, c.nom AS client_nom, c.taux_horaire AS client_taux,
+    `SELECT e.id, e.client_id, e.projet_id, e.facture_id,
+            e.debut, e.fin, e.duree_minutes, e.duree_arrondie_minutes, e.note,
+            c.nom AS client_nom, c.taux_horaire AS client_taux,
             p.nom AS projet_nom
      FROM entrees_temps e
      LEFT JOIN clients c ON c.id = e.client_id
@@ -224,4 +226,19 @@ export async function getFacturesParClient(client_id) {
      ORDER BY date_emission DESC`,
     [client_id]
   );
+}
+
+export async function updateEntree(id, { client_id, projet_id, debut, fin, duree_minutes, duree_arrondie_minutes, note }) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE entrees_temps SET client_id=?, projet_id=?, debut=?, fin=?, duree_minutes=?, duree_arrondie_minutes=?, note=? WHERE id=?",
+    [client_id, projet_id ?? null, debut, fin, duree_minutes, duree_arrondie_minutes ?? null, note || null, id]
+  );
+}
+
+export async function deleteEntree(id) {
+  const d = await getDb();
+  const rows = await d.select("SELECT facture_id FROM entrees_temps WHERE id = ?", [id]);
+  if (rows[0]?.facture_id) throw new Error("Cette entrée est liée à une facture.");
+  await d.execute("DELETE FROM entrees_temps WHERE id = ?", [id]);
 }
