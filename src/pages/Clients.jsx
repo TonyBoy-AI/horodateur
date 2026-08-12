@@ -8,6 +8,7 @@ import "./Clients.css";
 export default function Clients() {
   const [clients, setClients] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [editId, setEditId] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [factures, setFactures] = useState([]);
@@ -33,26 +34,34 @@ export default function Clients() {
   }
 
   const selectedClient = clients.find((c) => c.id === selectedId) ?? null;
-  const panelClient = showNew ? null : selectedClient;
-  const showPanel = showNew || selectedId !== null;
+  const editClient = showNew ? null : (clients.find((c) => c.id === editId) ?? null);
+  const showPanel = showNew || editId !== null;
 
   function handleCardClick(id) {
     setShowNew(false);
+    setEditId(null);
     setSelectedId((prev) => (prev === id ? null : id));
   }
 
-  function handleClose() {
+  function handleEditClick(id) {
     setSelectedId(null);
+    setShowNew(false);
+    setEditId((prev) => (prev === id ? null : id));
+  }
+
+  function handleClose() {
+    setEditId(null);
     setShowNew(false);
   }
 
   async function handleSaved() {
     await loadClients();
     setShowNew(false);
-    setSelectedId(null);
+    setEditId(null);
   }
 
   async function handleDeleted() {
+    setEditId(null);
     setSelectedId(null);
     setShowNew(false);
     await loadClients();
@@ -60,6 +69,7 @@ export default function Clients() {
 
   function handleNewClick() {
     setSelectedId(null);
+    setEditId(null);
     setShowNew(true);
   }
 
@@ -86,13 +96,14 @@ export default function Clients() {
               client={c}
               isSelected={c.id === selectedId}
               onClick={() => handleCardClick(c.id)}
+              onEdit={() => handleEditClick(c.id)}
             />
           ))}
         </div>
 
         {showPanel && (
           <ClientPanel
-            client={panelClient}
+            client={editClient}
             onClose={handleClose}
             onSaved={handleSaved}
             onDeleted={handleDeleted}

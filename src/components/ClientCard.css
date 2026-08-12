@@ -69,3 +69,19 @@
   background: #f5e0e0;
   color: #9b2c2c;
 }
+
+.client-card__edit-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.client-card:hover .client-card__edit-btn {
+  opacity: 1;
+}

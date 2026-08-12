@@ -1,6 +1,6 @@
 import "./ClientCard.css";
 
-export default function ClientCard({ client, isSelected, onClick }) {
+export default function ClientCard({ client, isSelected, onClick, onEdit }) {
   const classes = [
     "client-card",
     isSelected ? "client-card--selected" : "",
@@ -32,6 +32,14 @@ export default function ClientCard({ client, isSelected, onClick }) {
       <span className={`client-card__badge${!client.actif ? " client-card__badge--inactive" : ""}`}>
         {client.actif ? "Actif" : "Inactif"}
       </span>
+      <button
+        className="client-card__edit-btn"
+        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+        aria-label="Modifier"
+        tabIndex={-1}
+      >
+        ✏️
+      </button>
     </div>
   );
 }

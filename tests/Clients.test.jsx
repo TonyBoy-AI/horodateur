@@ -60,12 +60,12 @@ describe("Clients", () => {
     await waitFor(() => expect(screen.getByText("1 facture(s)")).toBeInTheDocument());
   });
 
-  it("cache le panel d'historique quand on ferme le panel client", async () => {
+  it("cache le panel d'historique quand on clique à nouveau la carte", async () => {
     render(<Clients />);
     await waitFor(() => expect(screen.getByText("Studio Lumière")).toBeInTheDocument());
     await userEvent.click(screen.getByText("Studio Lumière"));
     await waitFor(() => expect(screen.getByTestId("factures-panel")).toBeInTheDocument());
-    await userEvent.click(screen.getByText("Fermer"));
+    await userEvent.click(screen.getByText("Studio Lumière"));
     expect(screen.queryByTestId("factures-panel")).not.toBeInTheDocument();
   });
 });
