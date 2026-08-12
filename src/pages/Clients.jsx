@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { getClients } from "../db/database";
+import { getClients, getFacturesParClient } from "../db/database";
 import ClientCard from "../components/ClientCard";
 import ClientPanel from "../components/ClientPanel";
+import ClientFacturesPanel from "../components/ClientFacturesPanel";
 import "./Clients.css";
 
 export default function Clients() {
@@ -9,10 +10,16 @@ export default function Clients() {
   const [selectedId, setSelectedId] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [factures, setFactures] = useState([]);
 
   useEffect(() => {
     loadClients();
   }, []);
+
+  useEffect(() => {
+    if (!selectedId) { setFactures([]); return; }
+    getFacturesParClient(selectedId).then(setFactures).catch(console.error);
+  }, [selectedId]);
 
   async function loadClients() {
     setLoadError(null);
@@ -60,10 +67,7 @@ export default function Clients() {
     <div className="clients-page">
       <div className="clients-page__toolbar">
         <h1 className="clients-page__title">👥 Clients</h1>
-        <button
-          className="clients-page__new-btn"
-          onClick={handleNewClick}
-        >
+        <button className="clients-page__new-btn" onClick={handleNewClick}>
           + Nouveau client
         </button>
       </div>
@@ -93,6 +97,10 @@ export default function Clients() {
             onSaved={handleSaved}
             onDeleted={handleDeleted}
           />
+        )}
+
+        {selectedId !== null && selectedClient && (
+          <ClientFacturesPanel client={selectedClient} factures={factures} />
         )}
       </div>
     </div>
