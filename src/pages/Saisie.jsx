@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { getClients, getProjetsByClient, createEntreeComplete, getEntreesRecentes, getParametre } from "../db/database";
+import {
+  getClients, getProjetsByClient, createEntreeComplete,
+  getEntreesRecentes, getParametre,
+} from "../db/database";
+import EntreePanel from "../components/EntreePanel";
 import "./Saisie.css";
 
 function todayStr() {
@@ -33,6 +37,7 @@ export default function Saisie() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [entrees, setEntrees] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
   useEffect(() => {
     getClients().then(setClients).catch(console.error);
@@ -87,6 +92,12 @@ export default function Saisie() {
     setTimeout(() => setSuccess(false), 2000);
     loadEntrees();
   }
+
+  function handleEntreeClick(id) {
+    setSelectedId((prev) => (prev === id ? null : id));
+  }
+
+  const selectedEntree = entrees.find((e) => e.id === selectedId) ?? null;
 
   return (
     <div className="saisie-page">
@@ -146,20 +157,40 @@ export default function Saisie() {
       {entrees.length > 0 && (
         <section className="saisie-page__recents">
           <h2 className="saisie-page__recents-title">Entrées récentes</h2>
-          <ul className="saisie-page__list">
-            {entrees.map((e) => (
-              <li key={e.id} className="saisie-page__item">
-                <span className="saisie-page__item-date">{formatDate(e.debut)}</span>
-                <span className="saisie-page__item-times">{formatTime(e.debut)} – {formatTime(e.fin)}</span>
-                <span className="saisie-page__item-client">
-                  {e.client_nom}{e.projet_nom ? ` · ${e.projet_nom}` : ""}
-                </span>
-                <span className="saisie-page__item-duree">
-                  {formatDuration(e.duree_arrondie_minutes ?? e.duree_minutes)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="saisie-page__body">
+            <ul className="saisie-page__list">
+              {entrees.map((e) => (
+                <li
+                  key={e.id}
+                  className={`saisie-page__item${selectedId === e.id ? " saisie-page__item--selected" : ""}`}
+                  onClick={() => handleEntreeClick(e.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(ev) => ev.key === "Enter" && handleEntreeClick(e.id)}
+                >
+                  <span className="saisie-page__item-date">{formatDate(e.debut)}</span>
+                  <span className="saisie-page__item-times">{formatTime(e.debut)} – {formatTime(e.fin)}</span>
+                  <span className="saisie-page__item-client">
+                    {e.client_nom}{e.projet_nom ? ` · ${e.projet_nom}` : ""}
+                  </span>
+                  <span className="saisie-page__item-duree">
+                    {formatDuration(e.duree_arrondie_minutes ?? e.duree_minutes)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            {selectedEntree && (
+              <EntreePanel
+                key={selectedEntree.id}
+                entree={selectedEntree}
+                clients={clients}
+                onSaved={() => { setSelectedId(null); loadEntrees(); }}
+                onDeleted={() => { setSelectedId(null); loadEntrees(); }}
+                onClose={() => setSelectedId(null)}
+              />
+            )}
+          </div>
         </section>
       )}
     </div>

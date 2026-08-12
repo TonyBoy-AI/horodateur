@@ -174,3 +174,29 @@
   min-width: 48px;
   text-align: right;
 }
+
+.saisie-page__body {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.saisie-page__body .saisie-page__list {
+  flex: 1;
+  min-width: 0;
+}
+
+.saisie-page__item {
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.saisie-page__item:hover {
+  background: #f5fdf8;
+}
+
+.saisie-page__item--selected {
+  border-left-color: var(--color-accent);
+  background: #f0faf5;
+}
