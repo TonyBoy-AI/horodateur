@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Horodateur",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "identifier": "com.anthony.horodateur",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -36,7 +36,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyODIyODk3NDdDM0FCM0EKUldRNnE4TkhseWlDa3F0emJCM3dpK2l5dDlzcGNFd0N5RW5RVFpub3hLSlFVYklzKzRiSWV0OHoK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ3RUIyMzNENDNGMkU0NDkKUldSSjVQSkRQU1ByUjJmVUFZV2RTQjVscHl5SHM0WlM2di9EdUZuYVRBRDZBMjQwaUJ2OWtWbmcK",
       "endpoints": [
         "https://github.com/TonyBoy-AI/horodateur/releases/latest/download/latest.json"
       ]

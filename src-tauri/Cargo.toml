@@ -1,6 +1,6 @@
 [package]
 name = "horodateur"
-version = "0.2.1"
+version = "0.2.4"
 description = "Horodateur comptable"
 edition = "2021"
 

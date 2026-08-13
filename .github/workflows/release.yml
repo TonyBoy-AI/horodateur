@@ -31,16 +31,6 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
-      - name: Check signing secrets
-        env:
-          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          PWD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          if [ -z "$KEY" ]; then echo "KEY: EMPTY"; else echo "KEY: set (length ${#KEY})"; fi
-          if [ -z "$PWD" ]; then echo "PASSWORD: EMPTY"; else echo "PASSWORD: set (length ${#PWD})"; fi
-          echo "$KEY" | base64 -d | head -1
-        shell: bash
-
       - name: Build and release
         uses: tauri-apps/tauri-action@v0
         env:
