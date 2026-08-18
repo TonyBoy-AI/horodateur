@@ -3,8 +3,9 @@ import { getClients, getProjetsByClient } from "../db/database";
 import { useChrono } from "../ChronoContext";
 import "./Chrono.css";
 
-function formatElapsed(debut) {
-  const secs = Math.max(0, Math.floor((Date.now() - new Date(debut)) / 1000));
+function formatElapsed(debut, totalPausedMs, pausedAt) {
+  const endTime = pausedAt ? pausedAt : Date.now();
+  const secs = Math.max(0, Math.floor((endTime - new Date(debut).getTime() - totalPausedMs) / 1000));
   const h = String(Math.floor(secs / 3600)).padStart(2, "0");
   const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
   const s = String(secs % 60).padStart(2, "0");
@@ -12,7 +13,7 @@ function formatElapsed(debut) {
 }
 
 export default function Chrono() {
-  const { entree, demarrer, arreter, setNote } = useChrono();
+  const { entree, demarrer, arreter, setNote, paused, pauserReprendre, pauseInfo } = useChrono();
 
   const [clients, setClients] = useState([]);
   const [projets, setProjets] = useState([]);
@@ -47,21 +48,19 @@ export default function Chrono() {
     }
   }, [entree?.id]);
 
-  // Timer tick
+  // Timer tick — s'arrête quand en pause
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!entree) { setElapsed("00:00:00"); return; }
-    const tick = () => setElapsed(formatElapsed(entree.debut));
+    const tick = () => setElapsed(formatElapsed(entree.debut, pauseInfo.totalPausedMs, pauseInfo.pausedAt));
     tick();
+    if (paused) return;
     intervalRef.current = setInterval(tick, 1000);
     return () => clearInterval(intervalRef.current);
-  }, [entree?.debut]);
+  }, [entree?.debut, paused, pauseInfo.totalPausedMs]);
 
   async function handleDemarrer() {
-    await demarrer(
-      Number(clientId),
-      projetId ? Number(projetId) : null
-    );
+    await demarrer(Number(clientId), projetId ? Number(projetId) : null);
   }
 
   const running = !!entree;
@@ -102,7 +101,10 @@ export default function Chrono() {
         </div>
       </div>
 
-      <div className="chrono-page__timer">{elapsed}</div>
+      <div className={`chrono-page__timer${paused ? " chrono-page__timer--paused" : ""}`}>
+        {elapsed}
+      </div>
+      {paused && <span className="chrono-page__pause-badge">EN PAUSE</span>}
 
       <div className="chrono-page__field chrono-page__field--note">
         <label htmlFor="ch-note">Note</label>
@@ -117,9 +119,17 @@ export default function Chrono() {
       </div>
 
       {running ? (
-        <button className="chrono-page__btn chrono-page__btn--stop" onClick={arreter}>
-          ⏹ Arrêter
-        </button>
+        <div className="chrono-page__actions">
+          <button
+            className={`chrono-page__btn ${paused ? "chrono-page__btn--resume" : "chrono-page__btn--pause"}`}
+            onClick={pauserReprendre}
+          >
+            {paused ? "▶ Reprendre" : "⏸ Pause"}
+          </button>
+          <button className="chrono-page__btn chrono-page__btn--stop" onClick={arreter}>
+            ⏹ Arrêter
+          </button>
+        </div>
       ) : (
         <button
           className="chrono-page__btn chrono-page__btn--start"

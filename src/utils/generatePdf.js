@@ -67,6 +67,14 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
     page.drawText(String(str), { x, y, size, font, color });
   };
 
+  // Helper: centered text
+  const tc = (str, y, size = 9, font = regular, color = BLACK) => {
+    if (str == null || str === "") return;
+    const s = String(str);
+    const w = font.widthOfTextAtSize(s, size);
+    page.drawText(s, { x: ML + CW / 2 - w / 2, y, size, font, color });
+  };
+
   // Helper: filled rect (with optional border)
   const box = (x, y, w, h, fill, borderColor = null) => {
     page.drawRectangle({
@@ -144,7 +152,6 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
   // ── TABLE ───────────────────────────────────────────────────
   const tblTop = ibTop - ibHdr - ibBody - 12; // small gap after info boxes
   const tblHdrH = 20;
-  const exRowH = 16;
   const rowH = 18;
 
   const xDesc = ML;
@@ -170,20 +177,12 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
     page.drawLine({ start: {x, y: tblTop - tblHdrH}, end: {x, y: tblTop}, thickness: 0.5, color: rgb(0.5, 0.6, 0.8) });
   });
 
-  // Example/label row
-  box(ML, tblTop - tblHdrH - exRowH, CW, exRowH, LGRAY);
-  t("semaine du XX au XX", xDesc + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
-  t("Notes s'il y en a", xNote + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
-  t("H", xQty + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
-  t("$/h", xPrix + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
-  t("TOTAL", xMon + 5, tblTop - tblHdrH - 11, 8, regular, DARK);
-
   // Data rows
   const taux = client.taux_horaire ?? 0;
   let totalMinutesAll = 0;
 
   for (let i = 0; i < 8; i++) {
-    const ry = tblTop - tblHdrH - exRowH - (i + 1) * rowH;
+    const ry = tblTop - tblHdrH - (i + 1) * rowH;
     if (i % 2 === 1) box(ML, ry, CW, rowH, LBLUE);
     page.drawLine({ start: {x: ML, y: ry}, end: {x: ML + CW, y: ry}, thickness: 0.3, color: rgb(0.8, 0.8, 0.8) });
 
@@ -203,7 +202,7 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
     }
   }
 
-  const tblBottom = tblTop - tblHdrH - exRowH - 8 * rowH;
+  const tblBottom = tblTop - tblHdrH - 8 * rowH;
   const sousTotal = ((totalMinutesAll / 60) * taux).toFixed(2);
 
   // SOUS-TOTAL row
@@ -224,10 +223,10 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
 
   // ── FOOTER ──────────────────────────────────────────────────
   const fy = 95;
-  t("Pour toute question concernant cette facture, veuillez contacter", 155, fy + 30, 8, regular, DARK);
-  t(nomEmetteur.toUpperCase(), 248, fy + 16, 10, bold, DARK);
-  t(telEmetteur, 255, fy + 3, 9, bold, DARK);
-  t(courrielEmetteur, 236, fy - 10, 9, regular, DARK);
+  tc("Pour toute question concernant cette facture, veuillez contacter", fy + 30, 8, regular, DARK);
+  tc(nomEmetteur.toUpperCase(), fy + 16, 10, bold, DARK);
+  tc(telEmetteur, fy + 3, 9, bold, DARK);
+  tc(courrielEmetteur, fy - 10, 9, regular, DARK);
 
   const pdfBytes = await pdfDoc.save();
   return { pdfBytes, truncated, totalWeeks };

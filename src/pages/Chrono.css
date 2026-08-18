@@ -112,3 +112,31 @@
   background: #e76f51;
   color: white;
 }
+
+.chrono-page__btn--pause {
+  background: #f4a261;
+  color: white;
+}
+
+.chrono-page__btn--resume {
+  background: var(--color-accent);
+  color: var(--color-sidebar);
+}
+
+.chrono-page__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.chrono-page__timer--paused {
+  opacity: 0.45;
+}
+
+.chrono-page__pause-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #f4a261;
+  text-transform: uppercase;
+  margin-top: -12px;
+}
