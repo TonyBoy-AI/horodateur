@@ -195,7 +195,9 @@ export default function Factures() {
                 <span className="factures-page__item-date">{formatDate(f.date_emission)}</span>
               </div>
               <div className="factures-page__item-right">
-                <span className="factures-page__item-montant">{f.montant_total.toFixed(2)} $</span>
+                <span className="factures-page__item-montant">
+                  {(f.montant_paye ?? f.montant_total).toFixed(2)} $
+                </span>
                 <span className={`factures-page__badge factures-page__badge--${f.statut}`}>
                   {f.statut === "payee" ? "Payée" : "Impayée"}
                 </span>
