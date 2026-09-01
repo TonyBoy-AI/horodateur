@@ -4,6 +4,7 @@ import {
   demarrerEntree,
   arreterEntree,
   updateEntreeNote,
+  updateEntreePause,
   getParametre,
 } from "./db/database";
 
@@ -13,6 +14,7 @@ export function ChronoProvider({ children }) {
   const [entree, setEntree] = useState(null);
   const [pauseInfo, setPauseInfoState] = useState({ pausedAt: null, totalPausedMs: 0 });
   const pauseInfoRef = useRef({ pausedAt: null, totalPausedMs: 0 });
+  const entreeIdRef = useRef(null);
   const isStoppingRef = useRef(false);
 
   function setPauseInfo(next) {
@@ -21,7 +23,7 @@ export function ChronoProvider({ children }) {
     setPauseInfoState(val);
   }
 
-  // Restauration au démarrage de l'app
+  // Restauration au démarrage — lit aussi l'état de pause depuis la BD
   useEffect(() => {
     getEntreeOuverte()
       .then((e) => {
@@ -33,6 +35,10 @@ export function ChronoProvider({ children }) {
             projetId: e.projet_id ?? null,
             note: e.note ?? "",
           });
+          entreeIdRef.current = e.id;
+          const totalPausedMs = e.total_paused_ms ?? 0;
+          const pausedAt = e.paused_at ? new Date(e.paused_at).getTime() : null;
+          setPauseInfo({ pausedAt, totalPausedMs });
         }
       })
       .catch(console.error);
@@ -40,7 +46,8 @@ export function ChronoProvider({ children }) {
 
   // Réinitialiser la pause quand la session change
   useEffect(() => {
-    setPauseInfo({ pausedAt: null, totalPausedMs: 0 });
+    entreeIdRef.current = entree?.id ?? null;
+    if (!entree) setPauseInfo({ pausedAt: null, totalPausedMs: 0 });
   }, [entree?.id]);
 
   async function demarrer(clientId, projetId) {
@@ -93,12 +100,20 @@ export function ChronoProvider({ children }) {
   }
 
   function pauserReprendre() {
+    const id = entreeIdRef.current;
     setPauseInfo((prev) => {
+      let next;
       if (prev.pausedAt) {
-        return { pausedAt: null, totalPausedMs: prev.totalPausedMs + (Date.now() - prev.pausedAt) };
+        next = { pausedAt: null, totalPausedMs: prev.totalPausedMs + (Date.now() - prev.pausedAt) };
       } else {
-        return { ...prev, pausedAt: Date.now() };
+        next = { ...prev, pausedAt: Date.now() };
       }
+      // Persister dans la BD
+      if (id) {
+        const pausedAtIso = next.pausedAt ? new Date(next.pausedAt).toISOString() : null;
+        updateEntreePause(id, pausedAtIso, next.totalPausedMs).catch(console.error);
+      }
+      return next;
     });
   }
 

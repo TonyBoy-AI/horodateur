@@ -67,9 +67,17 @@ export async function deleteProjet(id) {
 export async function getEntreeOuverte() {
   const d = await getDb();
   const rows = await d.select(
-    "SELECT * FROM entrees_temps WHERE fin IS NULL LIMIT 1"
+    "SELECT id, client_id, projet_id, debut, note, paused_at, total_paused_ms FROM entrees_temps WHERE fin IS NULL LIMIT 1"
   );
   return rows[0] ?? null;
+}
+
+export async function updateEntreePause(id, paused_at, total_paused_ms) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE entrees_temps SET paused_at=?, total_paused_ms=? WHERE id=?",
+    [paused_at ?? null, total_paused_ms ?? 0, id]
+  );
 }
 
 export async function demarrerEntree({ client_id, projet_id, debut }) {

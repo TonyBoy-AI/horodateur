@@ -29,6 +29,12 @@ fn main() {
             sql: include_str!("../migrations/004_add_montant_paye.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "add_pause_fields",
+            sql: include_str!("../migrations/005_add_pause_fields.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
