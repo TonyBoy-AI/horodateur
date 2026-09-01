@@ -357,3 +357,121 @@
   border-radius: 8px;
   padding: 8px 12px;
 }
+
+/* Modal paiement */
+
+.pay-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 340px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pay-modal__title {
+  font-family: var(--font-title);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pay-modal__facture {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: -8px;
+}
+
+.pay-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pay-modal__field label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pay-modal__field input {
+  border: 1.5px solid #c8efd8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-title);
+  color: var(--color-text);
+  background: white;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pay-modal__field input:focus {
+  border-color: var(--color-accent);
+}
+
+.pay-modal__recap {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 4px 0;
+  border-top: 1px solid #e8f8ee;
+}
+
+.pay-modal__recap--diff {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pay-modal__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.pay-modal__btn {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.pay-modal__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pay-modal__btn--cancel {
+  background: #f0f0f0;
+  color: var(--color-text-muted);
+}
+
+.pay-modal__btn--confirm {
+  background: var(--color-accent);
+  color: var(--color-sidebar);
+}
+
+.pay-modal__btn--confirm:hover:not(:disabled) {
+  opacity: 0.85;
+}

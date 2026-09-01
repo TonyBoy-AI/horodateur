@@ -164,7 +164,7 @@ export async function getEntreesParPeriode({ debut, fin, client_id = null }) {
 export async function getFactures() {
   const d = await getDb();
   return d.select(
-    `SELECT f.id, f.client_id, f.numero, f.date_emission, f.montant_total, f.statut,
+    `SELECT f.id, f.client_id, f.numero, f.date_emission, f.montant_total, f.montant_paye, f.statut,
             c.nom AS client_nom
      FROM factures f
      LEFT JOIN clients c ON c.id = f.client_id
@@ -204,6 +204,14 @@ export async function linkEntreesToFacture(facture_id, entree_ids) {
 export async function updateFactureStatut(id, statut) {
   const d = await getDb();
   await d.execute("UPDATE factures SET statut=? WHERE id=?", [statut, id]);
+}
+
+export async function updateFactureStatutEtMontant(id, statut, montant_paye) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE factures SET statut=?, montant_paye=? WHERE id=?",
+    [statut, montant_paye ?? null, id]
+  );
 }
 
 export async function getEntreesParFacture(facture_id) {

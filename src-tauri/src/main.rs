@@ -23,6 +23,12 @@ fn main() {
             sql: include_str!("../migrations/003_parametres_entreprise.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "add_montant_paye",
+            sql: include_str!("../migrations/004_add_montant_paye.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

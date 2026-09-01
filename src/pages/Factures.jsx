@@ -6,6 +6,7 @@ import {
   createFacture,
   linkEntreesToFacture,
   updateFactureStatut,
+  updateFactureStatutEtMontant,
   getEntreesParFacture,
   getParametre,
 } from "../db/database";
@@ -39,6 +40,8 @@ export default function Factures() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [pdfWarning, setPdfWarning] = useState(null);
+  const [payModal, setPayModal] = useState(null); // { facture } | null
+  const [montantSaisi, setMontantSaisi] = useState("");
 
   useEffect(() => {
     loadFactures();
@@ -143,10 +146,26 @@ export default function Factures() {
     }
   }
 
-  async function toggleStatut(facture) {
-    const next = facture.statut === "payee" ? "impayee" : "payee";
+  function handleClickStatut(facture) {
+    if (facture.statut === "payee") {
+      // Marquer impayée directement, reset montant_paye
+      updateFactureStatutEtMontant(facture.id, "impayee", null)
+        .then(loadFactures)
+        .catch(console.error);
+    } else {
+      // Ouvrir le modal de confirmation du montant
+      setMontantSaisi(facture.montant_total.toFixed(2));
+      setPayModal({ facture });
+    }
+  }
+
+  async function confirmerPaiement() {
+    if (!payModal) return;
+    const montant = parseFloat(montantSaisi.replace(",", "."));
+    if (isNaN(montant) || montant < 0) return;
     try {
-      await updateFactureStatut(facture.id, next);
+      await updateFactureStatutEtMontant(payModal.facture.id, "payee", montant);
+      setPayModal(null);
       loadFactures();
     } catch (err) {
       console.error(err);
@@ -180,7 +199,7 @@ export default function Factures() {
                 <span className={`factures-page__badge factures-page__badge--${f.statut}`}>
                   {f.statut === "payee" ? "Payée" : "Impayée"}
                 </span>
-                <button className="factures-page__btn-statut" onClick={() => toggleStatut(f)}>
+                <button className="factures-page__btn-statut" onClick={() => handleClickStatut(f)}>
                   {f.statut === "payee" ? "Marquer impayée" : "Marquer payée"}
                 </button>
                 <button className="factures-page__btn-pdf" onClick={() => handleDownloadPdf(f)}>
@@ -191,6 +210,57 @@ export default function Factures() {
           ))}
         </ul>
       )}
+
+      {payModal && (() => {
+        const montant = parseFloat(montantSaisi.replace(",", "."));
+        const total = payModal.facture.montant_total;
+        const diff = isNaN(montant) ? null : montant - total;
+        const diffStr = diff != null && Math.abs(diff) >= 0.01
+          ? `${diff >= 0 ? "+" : ""}${diff.toFixed(2)} $`
+          : null;
+        return (
+          <div className="pay-modal__overlay" onClick={() => setPayModal(null)}>
+            <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
+              <h2 className="pay-modal__title">Confirmer le paiement</h2>
+              <p className="pay-modal__facture">{payModal.facture.numero} — {payModal.facture.client_nom}</p>
+              <div className="pay-modal__field">
+                <label htmlFor="pay-montant">Montant reçu ($)</label>
+                <input
+                  id="pay-montant"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={montantSaisi}
+                  onChange={(e) => setMontantSaisi(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="pay-modal__recap">
+                <span>Montant facturé</span>
+                <span>{total.toFixed(2)} $</span>
+              </div>
+              {diffStr && (
+                <div className="pay-modal__recap pay-modal__recap--diff">
+                  <span>Arrondissement</span>
+                  <span>{diffStr}</span>
+                </div>
+              )}
+              <div className="pay-modal__actions">
+                <button className="pay-modal__btn pay-modal__btn--cancel" onClick={() => setPayModal(null)}>
+                  Annuler
+                </button>
+                <button
+                  className="pay-modal__btn pay-modal__btn--confirm"
+                  onClick={confirmerPaiement}
+                  disabled={isNaN(montant) || montant < 0}
+                >
+                  Confirmer payée
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {panelOpen && (
         <div className="factures-panel__overlay" onClick={() => setPanelOpen(false)}>

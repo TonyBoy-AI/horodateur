@@ -203,21 +203,36 @@ export async function generatePdf(facture, client, entrees, emetteur = {}) {
   }
 
   const tblBottom = tblTop - tblHdrH - 8 * rowH;
-  const sousTotal = ((totalMinutesAll / 60) * taux).toFixed(2);
+  const sousTotalNum = (totalMinutesAll / 60) * taux;
+  const sousTotal = sousTotalNum.toFixed(2);
+
+  const montantPayeNum = facture.montant_paye != null ? facture.montant_paye : null;
+  const arrondissementNum = montantPayeNum != null ? montantPayeNum - sousTotalNum : 0;
+  const hasArrondissement = Math.abs(arrondissementNum) >= 0.01;
+  const totalFinal = montantPayeNum != null ? montantPayeNum : sousTotalNum;
 
   // SOUS-TOTAL row
   box(ML, tblBottom - 22, CW, 22, LGRAY);
   t("SOUS-TOTAL", xQty + 5, tblBottom - 15, 9, bold, BLACK);
   t(sousTotal, xMon + 5, tblBottom - 15, 9, regular, BLACK);
 
+  // ARRONDISSEMENT row (only if paid amount differs)
+  if (hasArrondissement) {
+    const arrStr = (arrondissementNum >= 0 ? "+" : "") + arrondissementNum.toFixed(2);
+    box(ML, tblBottom - 44, CW, 22, LGRAY);
+    t("ARRONDISSEMENT", xQty + 5, tblBottom - 37, 9, bold, BLACK);
+    t(arrStr, xMon + 5, tblBottom - 37, 9, regular, BLACK);
+  }
+
   // TOTAL row
-  box(ML, tblBottom - 44, CW, 22, BLUE);
-  t("TOTAL", xQty + 5, tblBottom - 37, 10, bold, WHITE);
-  t(sousTotal + " $", xMon + 5, tblBottom - 37, 10, bold, WHITE);
+  const totalY = hasArrondissement ? tblBottom - 66 : tblBottom - 44;
+  box(ML, totalY, CW, 22, BLUE);
+  t("TOTAL", xQty + 5, totalY + 7, 10, bold, WHITE);
+  t(totalFinal.toFixed(2) + " $", xMon + 5, totalY + 7, 10, bold, WHITE);
 
   // Outer table border
   page.drawRectangle({
-    x: ML, y: tblBottom - 44, width: CW, height: tblTop - (tblBottom - 44),
+    x: ML, y: totalY, width: CW, height: tblTop - totalY,
     borderColor: rgb(0.6, 0.6, 0.6), borderWidth: 0.5, color: undefined,
   });
 
