@@ -209,6 +209,22 @@ export async function linkEntreesToFacture(facture_id, entree_ids) {
   }
 }
 
+export async function updateFacture(id, { client_id, numero, date_emission, montant_total }) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE factures SET client_id=?, numero=?, date_emission=?, montant_total=? WHERE id=?",
+    [client_id, numero, date_emission, montant_total, id]
+  );
+}
+
+export async function reassignerEntreesFacture(facture_id, client_id) {
+  const d = await getDb();
+  await d.execute(
+    "UPDATE entrees_temps SET client_id=?, projet_id=NULL WHERE facture_id=?",
+    [client_id, facture_id]
+  );
+}
+
 export async function updateFactureStatut(id, statut) {
   const d = await getDb();
   await d.execute("UPDATE factures SET statut=? WHERE id=?", [statut, id]);

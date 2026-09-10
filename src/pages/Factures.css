@@ -350,6 +350,35 @@
   color: var(--color-text);
 }
 
+.factures-page__btn-edit {
+  border: 1.5px solid #c8efd8;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  line-height: 1;
+}
+
+.factures-page__btn-edit:hover {
+  border-color: var(--color-accent);
+}
+
+.factures-panel__edit-recap {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: 6px 0;
+  border-top: 1px solid #e8f8ee;
+}
+
+.factures-panel__edit-recap span:last-child {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
 .factures-panel__warning {
   font-size: 12px;
   color: #b45309;

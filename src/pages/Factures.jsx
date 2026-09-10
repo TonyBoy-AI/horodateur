@@ -5,6 +5,8 @@ import {
   getEntreesSansFacture,
   createFacture,
   linkEntreesToFacture,
+  updateFacture,
+  reassignerEntreesFacture,
   updateFactureStatut,
   updateFactureStatutEtMontant,
   getEntreesParFacture,
@@ -42,6 +44,11 @@ export default function Factures() {
   const [pdfWarning, setPdfWarning] = useState(null);
   const [payModal, setPayModal] = useState(null); // { facture } | null
   const [montantSaisi, setMontantSaisi] = useState("");
+  const [editPanel, setEditPanel] = useState(null); // { facture, entrees } | null
+  const [editClientId, setEditClientId] = useState("");
+  const [editNumero, setEditNumero] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     loadFactures();
@@ -146,6 +153,50 @@ export default function Factures() {
     }
   }
 
+  async function openEditPanel(facture) {
+    try {
+      const entrees = await getEntreesParFacture(facture.id);
+      setEditClientId(String(facture.client_id));
+      setEditNumero(facture.numero);
+      setEditDate(facture.date_emission.slice(0, 10));
+      setEditPanel({ facture, entrees });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleSaveEdit() {
+    if (!editPanel) return;
+    setEditSaving(true);
+    try {
+      const newClientId = Number(editClientId);
+      const newClient = clients.find((c) => c.id === newClientId);
+      const taux = newClient?.taux_horaire ?? 0;
+      const totalMinutes = editPanel.entrees.reduce(
+        (s, e) => s + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
+      );
+      const montant_total = (totalMinutes / 60) * taux;
+
+      await updateFacture(editPanel.facture.id, {
+        client_id: newClientId,
+        numero: editNumero,
+        date_emission: editDate,
+        montant_total,
+      });
+
+      if (newClientId !== editPanel.facture.client_id) {
+        await reassignerEntreesFacture(editPanel.facture.id, newClientId);
+      }
+
+      setEditPanel(null);
+      loadFactures();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
   function handleClickStatut(facture) {
     if (facture.statut === "payee") {
       // Marquer impayée directement, reset montant_paye
@@ -207,11 +258,85 @@ export default function Factures() {
                 <button className="factures-page__btn-pdf" onClick={() => handleDownloadPdf(f)}>
                   📄 PDF
                 </button>
+                <button className="factures-page__btn-edit" onClick={() => openEditPanel(f)} title="Modifier la facture">
+                  ✏️
+                </button>
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      {editPanel && (() => {
+        const newClient = clients.find((c) => c.id === Number(editClientId));
+        const taux = newClient?.taux_horaire ?? 0;
+        const totalMinutes = editPanel.entrees.reduce(
+          (s, e) => s + (e.duree_arrondie_minutes ?? e.duree_minutes ?? 0), 0
+        );
+        const newTotal = (totalMinutes / 60) * taux;
+        const clientChanged = Number(editClientId) !== editPanel.facture.client_id;
+        return (
+          <div className="factures-panel__overlay" onClick={() => setEditPanel(null)}>
+            <div className="factures-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="factures-panel__header">
+                <h2 className="factures-panel__title">Modifier la facture</h2>
+                <button className="factures-panel__close" onClick={() => setEditPanel(null)}>✕</button>
+              </div>
+              <div className="factures-panel__form">
+                <div className="factures-panel__field">
+                  <label>Client</label>
+                  <select value={editClientId} onChange={(e) => setEditClientId(e.target.value)}>
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>{c.nom}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="factures-panel__field">
+                  <label>Numéro de facture</label>
+                  <input
+                    type="text"
+                    value={editNumero}
+                    onChange={(e) => setEditNumero(e.target.value)}
+                  />
+                </div>
+
+                <div className="factures-panel__field">
+                  <label>Date d'émission</label>
+                  <input
+                    type="date"
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="factures-panel__edit-recap">
+                  <span>Entrées liées</span>
+                  <span>{editPanel.entrees.length} entrée{editPanel.entrees.length !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="factures-panel__edit-recap">
+                  <span>Nouveau total</span>
+                  <span>{newTotal.toFixed(2)} $</span>
+                </div>
+
+                {clientChanged && (
+                  <p className="factures-panel__warning">
+                    Le client sera modifié sur toutes les entrées de temps liées à cette facture. Les projets associés seront retirés.
+                  </p>
+                )}
+
+                <button
+                  className="factures-panel__btn-submit"
+                  onClick={handleSaveEdit}
+                  disabled={!editClientId || !editNumero || !editDate || editSaving}
+                >
+                  {editSaving ? "Sauvegarde…" : "Sauvegarder"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {payModal && (() => {
         const montant = parseFloat(montantSaisi.replace(",", "."));
